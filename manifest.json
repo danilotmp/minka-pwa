@@ -1,6 +1,6 @@
 {
-  "name": "Minka Backpackers - Door Access",
-  "short_name": "Minka Door",
+  "name": "Minka Access",
+  "short_name": "Minka Access",
   "description": "Acceso a puerta Minka Backpackers",
   "start_url": ".",
   "display": "standalone",
@@ -12,7 +12,13 @@
       "src": "https://static.wixstatic.com/media/16b791_bc5ee8f8d8fe4e8d80c935db3aafd599~mv2.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "https://static.wixstatic.com/media/16b791_bc5ee8f8d8fe4e8d80c935db3aafd599~mv2.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ]
 }
