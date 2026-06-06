@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="https://static.wixstatic.com/media/16b791_bc5ee8f8d8fe4e8d80c935db3aafd599~mv2.png">
-<link rel="apple-touch-icon" href="https://static.wixstatic.com/media/16b791_bc5ee8f8d8fe4e8d80c935db3aafd599~mv2.png">
+<link rel="apple-touch-icon" href="https://static.wixstatic.com/media/16b791_313a210ae33b4d29914a7cb3556419fe~mv2.png">
 <title>Minka Door</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
@@ -38,21 +38,21 @@ p{font-size:13px;color:#666;line-height:1.5;margin-bottom:20px}
 </div>
 <script>
 var p=new URLSearchParams(window.location.search);
-// Decodificar token: Base64(UUID|KEY)
 var token=p.get('t')||localStorage.getItem('minka_door_token')||'';
-var uuid='';var key='';
-if(token){try{var decoded=atob(token);var parts=decoded.split('|');uuid=parts[0]||'';key=parts[1]||''}catch(e){}}
-if(!uuid){uuid=p.get('door')||localStorage.getItem('minka_door_uuid')||'';key=p.get('key')||localStorage.getItem('minka_door_key')||''}
-if(token)localStorage.setItem('minka_door_token',token);
-if(uuid)localStorage.setItem('minka_door_uuid',uuid);
-if(key)localStorage.setItem('minka_door_key',key);
-var doorUrl='https://www.minkahostel.com/?t='+(token||btoa(uuid+'|'+key));
-document.getElementById('btnDoor').href=doorUrl;
+if(p.get('t'))localStorage.setItem('minka_door_token',token);
+// Fallback: door + key
+if(!token){var uuid=p.get('door')||'';var key=p.get('key')||'';if(uuid){token=btoa(uuid+'|'+key);localStorage.setItem('minka_door_token',token)}}
+// Construir URL de Wix con token
+var wixUrl='https://www.minkahostel.com/?t='+encodeURIComponent(token);
+document.getElementById('btnDoor').href=wixUrl;
+// Si es standalone (abierto desde icono), redirigir directo
+if(window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone){window.location.href=wixUrl}
+// Service Worker
 if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(function(){});
+// PWA Install
 var dp=null;
 window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();dp=e;document.getElementById('btnInstall').style.display='block'});
 document.getElementById('btnInstall').addEventListener('click',function(){if(dp){dp.prompt();dp.userChoice.then(function(r){if(r.outcome==='accepted'){document.getElementById('btnInstall').style.display='none';document.getElementById('okMsg').style.display='block'}dp=null})}});
-if(window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone){window.location.href=doorUrl}
 var isIos=/iPad|iPhone|iPod/.test(navigator.userAgent)&&!window.MSStream;
 if(isIos&&!window.navigator.standalone){document.getElementById('btnInstall').style.display='block';document.getElementById('btnInstall').onclick=function(){document.getElementById('guideIos').style.display='block'}}
 window.addEventListener('appinstalled',function(){document.getElementById('btnInstall').style.display='none';document.getElementById('okMsg').style.display='block'});
