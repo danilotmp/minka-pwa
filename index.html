@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<meta name="theme-color" content="#1a56db">
+<meta name="theme-color" content="#3d4a5c">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="manifest" href="manifest.json">
@@ -24,32 +24,41 @@ p{font-size:13px;color:#666;line-height:1.5;margin-bottom:20px}
 .btn-install:active{transform:scale(0.97)}
 .guide{display:none;margin-top:16px;padding:12px;background:#f0f7ff;border-radius:10px;font-size:11px;color:#555;line-height:1.6;text-align:left}
 .ok-msg{display:none;margin-top:12px;padding:10px;background:#ecfdf5;border-radius:8px;font-size:12px;color:#059669;font-weight:600}
+.loading{text-align:center}
+.loading .sp{width:36px;height:36px;border:3px solid rgba(255,255,255,.2);border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 12px}
+.loading p{color:rgba(255,255,255,.6);font-size:11px}
+@keyframes spin{to{transform:rotate(360deg)}}
 </style>
+<script>
+// Detección inmediata ANTES de renderizar el body
+(function(){
+var isStandalone=window.matchMedia('(display-mode: standalone)').matches||(window.navigator&&window.navigator.standalone);
+var token=new URLSearchParams(window.location.search).get('t')||localStorage.getItem('minka_door_token')||'';
+if(isStandalone&&token){
+document.documentElement.style.background='#3d4a5c';
+window.location.replace('https://www.minkahostel.com/?t='+encodeURIComponent(token));
+}
+})();
+</script>
 </head>
 <body>
-<div class="card">
+<div class="card" id="mainCard">
 <div class="logo"><img src="https://static.wixstatic.com/media/16b791_bc5ee8f8d8fe4e8d80c935db3aafd599~mv2.png" alt="Minka"></div>
 <h1>Minka Backpackers</h1>
 <p>Tu acceso a la puerta del hotel, disponible 24/7.<br><span style="font-size:11px;color:#999">Your hotel door access, available 24/7.</span></p>
 <a class="btn-door" id="btnDoor" href="#">🔓 Abrir Puerta<br><span style="font-size:11px;font-weight:400;opacity:.7">Open Door</span></a>
 <button class="btn-install" id="btnInstall">📲 Instalar en pantalla<br><span style="font-size:10px;font-weight:400;opacity:.7">Install on home screen</span></button>
-<div class="guide" id="guideIos"><strong>Para instalar en iPhone/iPad:</strong><br>1. Toca el icono compartir ↑ (barra inferior)<br>2. Selecciona "Agregar a pantalla de inicio"<br>3. Toca "Agregar"<br><br><span style="color:#999;font-size:10px"><strong>To install on iPhone/iPad:</strong><br>1. Tap share icon ↑ (bottom bar)<br>2. Select "Add to Home Screen"<br>3. Tap "Add"</span></div>
-<div class="ok-msg" id="okMsg">✓ Instalado. Abre desde tu pantalla de inicio.<br><span style="font-size:10px;opacity:.8">Installed. Open from your home screen.</span></div>
+<div class="guide" id="guideIos"><strong>Para instalar en iPhone/iPad:</strong><br>1. Toca el icono compartir ↑<br>2. "Agregar a pantalla de inicio"<br>3. "Agregar"<br><br><span style="color:#999;font-size:10px"><strong>iPhone/iPad:</strong> Tap share ↑ → Add to Home Screen → Add</span></div>
+<div class="ok-msg" id="okMsg">✓ Instalado.<br><span style="font-size:10px;opacity:.8">Installed. Open from home screen.</span></div>
 </div>
 <script>
 var p=new URLSearchParams(window.location.search);
 var token=p.get('t')||localStorage.getItem('minka_door_token')||'';
 if(p.get('t'))localStorage.setItem('minka_door_token',token);
-// Fallback: door + key
 if(!token){var uuid=p.get('door')||'';var key=p.get('key')||'';if(uuid){token=btoa(uuid+'|'+key);localStorage.setItem('minka_door_token',token)}}
-// Construir URL de Wix con token
 var wixUrl='https://www.minkahostel.com/?t='+encodeURIComponent(token);
 document.getElementById('btnDoor').href=wixUrl;
-// Si es standalone (abierto desde icono), redirigir directo
-if(window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone){window.location.href=wixUrl}
-// Service Worker
 if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(function(){});
-// PWA Install
 var dp=null;
 window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();dp=e;document.getElementById('btnInstall').style.display='block'});
 document.getElementById('btnInstall').addEventListener('click',function(){if(dp){dp.prompt();dp.userChoice.then(function(r){if(r.outcome==='accepted'){document.getElementById('btnInstall').style.display='none';document.getElementById('okMsg').style.display='block'}dp=null})}});
