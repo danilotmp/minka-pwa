@@ -70,7 +70,7 @@ if(isPwa&&token){
   // El iframe se escala 1.2 → darle dimensiones reducidas para que al escalar = pantalla
   var sc=1.3;
   f.style.width=Math.round(window.innerWidth/sc)+'px';
-  f.style.height=window.innerHeight+'px';
+  f.style.height=Math.round(window.innerHeight/1.25)+'px';
   f.src='https://www.minkahostel.com/?t='+encodeURIComponent(token);
   // Historial
   history.pushState({p:1},'','');
