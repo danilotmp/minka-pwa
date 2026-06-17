@@ -2,10 +2,10 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover">
-<meta name="theme-color" content="#ffffff">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="theme-color" content="#3d4a5c">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="https://static.wixstatic.com/media/16b791_bc5ee8f8d8fe4e8d80c935db3aafd599~mv2.png">
 <link rel="apple-touch-icon" href="https://static.wixstatic.com/media/16b791_313a210ae33b4d29914a7cb3556419fe~mv2.png">
@@ -17,7 +17,7 @@ var token=new URLSearchParams(window.location.search).get('t')||localStorage.get
 if(!token){var uuid=new URLSearchParams(window.location.search).get('door')||'';var key=new URLSearchParams(window.location.search).get('key')||'';if(uuid){token=btoa(uuid+'|'+key)}}
 if(token)localStorage.setItem('minka_door_token',token);
 if(isStandalone&&token){
-document.write('<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover"><meta name="theme-color" content="#ffffff"><meta name="apple-mobile-web-app-capable" content="yes"><link rel="manifest" href="manifest.json"><title>Minka Door</title><style>*{margin:0;padding:0}html,body{width:100%;height:100%;overflow:hidden}iframe{position:fixed;top:0;left:0;width:100%;height:100%;border:0}</style></head><body><iframe src="https://www.minkahostel.com/?t='+encodeURIComponent(token)+'" allow="geolocation *; camera *" allowfullscreen><\/iframe><script>if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js").catch(function(){});history.pushState({p:1},"","");var _lt=0;window.addEventListener("popstate",function(e){var n=Date.now();if(n-_lt<800)return;_lt=n;history.pushState({p:1},"","")});<\/script><\/body><\/html>');
+document.write('<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><meta name="theme-color" content="#3d4a5c"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><link rel="manifest" href="manifest.json"><title>Minka Door</title><style>*{margin:0;padding:0}html,body{width:100%;height:100%;overflow:hidden}iframe{position:fixed;top:0;left:0;width:100%;height:100%;border:0}</style></head><body><iframe src="https://www.minkahostel.com/?t='+encodeURIComponent(token)+'" allow="geolocation *; camera *" allowfullscreen><\/iframe><script>if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js").catch(function(){});history.pushState({p:1},"","");var _lt=0;window.addEventListener("popstate",function(e){var n=Date.now();if(n-_lt<800)return;_lt=n;history.pushState({p:1},"","")});<\/script><\/body><\/html>');
 document.close();
 }
 })();
@@ -50,7 +50,6 @@ p{font-size:13px;color:#666;line-height:1.5;margin-bottom:20px}
 <div class="ok-msg" id="okMsg">✓ Instalado.<br><span style="font-size:10px;opacity:.8">Installed. Open from home screen.</span></div>
 </div>
 <script>
-(function(){
 var p=new URLSearchParams(window.location.search);
 var token=p.get('t')||localStorage.getItem('minka_door_token')||'';
 if(p.get('t'))localStorage.setItem('minka_door_token',token);
@@ -64,7 +63,6 @@ document.getElementById('btnInstall').addEventListener('click',function(){if(dp)
 var isIos=/iPad|iPhone|iPod/.test(navigator.userAgent)&&!window.MSStream;
 if(isIos&&!window.navigator.standalone){document.getElementById('btnInstall').style.display='block';document.getElementById('btnInstall').onclick=function(){document.getElementById('guideIos').style.display='block'}}
 window.addEventListener('appinstalled',function(){document.getElementById('btnInstall').style.display='none';document.getElementById('okMsg').style.display='block'});
-})();
 </script>
 </body>
 </html>
