@@ -10,14 +10,22 @@
 <link rel="icon" href="https://static.wixstatic.com/media/16b791_bc5ee8f8d8fe4e8d80c935db3aafd599~mv2.png">
 <link rel="apple-touch-icon" href="https://static.wixstatic.com/media/16b791_313a210ae33b4d29914a7cb3556419fe~mv2.png">
 <title>Minka Door</title>
+<script>
+(function(){
+var isStandalone=window.matchMedia('(display-mode: standalone)').matches||(window.navigator&&window.navigator.standalone);
+var token=new URLSearchParams(window.location.search).get('t')||localStorage.getItem('minka_door_token')||'';
+if(!token){var uuid=new URLSearchParams(window.location.search).get('door')||'';var key=new URLSearchParams(window.location.search).get('key')||'';if(uuid){token=btoa(uuid+'|'+key)}}
+if(token)localStorage.setItem('minka_door_token',token);
+if(isStandalone&&token){
+document.write('<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover"><meta name="theme-color" content="#ffffff"><meta name="apple-mobile-web-app-capable" content="yes"><link rel="manifest" href="manifest.json"><title>Minka Door</title><style>*{margin:0;padding:0}html,body{width:100%;height:100%;overflow:hidden}iframe{position:fixed;top:0;left:0;width:100%;height:100%;border:0}</style></head><body><iframe src="https://www.minkahostel.com/?t='+encodeURIComponent(token)+'" allow="geolocation *; camera *" allowfullscreen><\/iframe><script>if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js").catch(function(){});history.pushState({p:1},"","");var _lt=0;window.addEventListener("popstate",function(e){var n=Date.now();if(n-_lt<800)return;_lt=n;history.pushState({p:1},"","")});<\/script><\/body><\/html>');
+document.close();
+}
+})();
+</script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-html,body{width:100%;height:100%;overflow:hidden}
-body{background:#3d4a5c;display:flex;align-items:center;justify-content:center}
-body.mode-iframe{background:#fff;display:block}
-body.mode-card{overflow:auto;padding:20px}
-.card{background:#fff;border-radius:20px;padding:40px 24px;max-width:340px;width:100%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.2);display:none}
-body.mode-card .card{display:block}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#3d4a5c;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+.card{background:#fff;border-radius:20px;padding:40px 24px;max-width:340px;width:100%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.2)}
 .logo{width:80px;height:80px;margin:0 auto 16px}
 .logo img{width:100%;height:100%;object-fit:contain}
 h1{font-size:18px;color:#1e3a5f;margin-bottom:8px}
@@ -28,8 +36,7 @@ p{font-size:13px;color:#666;line-height:1.5;margin-bottom:20px}
 .btn-install:active{transform:scale(0.97)}
 .guide{display:none;margin-top:16px;padding:12px;background:#f0f7ff;border-radius:10px;font-size:11px;color:#555;line-height:1.6;text-align:left}
 .ok-msg{display:none;margin-top:12px;padding:10px;background:#ecfdf5;border-radius:8px;font-size:12px;color:#059669;font-weight:600}
-#wixFrame{display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;border:0;z-index:9999}
-body.mode-iframe #wixFrame{display:block}
+@keyframes spin{to{transform:rotate(360deg)}}
 </style>
 </head>
 <body>
@@ -42,50 +49,21 @@ body.mode-iframe #wixFrame{display:block}
 <div class="guide" id="guideIos"><strong>Para instalar en iPhone/iPad:</strong><br>1. Toca el icono compartir ↑<br>2. "Agregar a pantalla de inicio"<br>3. "Agregar"<br><br><span style="color:#999;font-size:10px"><strong>iPhone/iPad:</strong> Tap share ↑ → Add to Home Screen → Add</span></div>
 <div class="ok-msg" id="okMsg">✓ Instalado.<br><span style="font-size:10px;opacity:.8">Installed. Open from home screen.</span></div>
 </div>
-<iframe id="wixFrame" allow="geolocation *; camera *" allowfullscreen></iframe>
 <script>
 (function(){
-// Resolver token
 var p=new URLSearchParams(window.location.search);
 var token=p.get('t')||localStorage.getItem('minka_door_token')||'';
 if(p.get('t'))localStorage.setItem('minka_door_token',token);
 if(!token){var uuid=p.get('door')||'';var key=p.get('key')||'';if(uuid){token=btoa(uuid+'|'+key);localStorage.setItem('minka_door_token',token)}}
-
-// Detectar standalone
-var isStandalone=window.matchMedia('(display-mode: standalone)').matches||(window.navigator&&window.navigator.standalone);
-
-if(isStandalone&&token){
-  // ═══ MODO IFRAME ═══
-  document.body.className='mode-iframe';
-  var iframe=document.getElementById('wixFrame');
-  iframe.src='https://www.minkahostel.com/?t='+encodeURIComponent(token);
-
-  // Historial para evitar que back saque del PWA
-  history.pushState({p:1},'','');
-  var _lt=0;
-  window.addEventListener('popstate',function(e){
-    var n=Date.now();
-    if(n-_lt<800)return;
-    _lt=n;
-    history.pushState({p:1},'','');
-  });
-} else {
-  // ═══ MODO CARD (navegador normal) ═══
-  document.body.className='mode-card';
-  var wixUrl='https://www.minkahostel.com/?t='+encodeURIComponent(token);
-  document.getElementById('btnDoor').href=wixUrl;
-
-  // Instalación PWA
-  var dp=null;
-  window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();dp=e;document.getElementById('btnInstall').style.display='block'});
-  document.getElementById('btnInstall').addEventListener('click',function(){if(dp){dp.prompt();dp.userChoice.then(function(r){if(r.outcome==='accepted'){document.getElementById('btnInstall').style.display='none';document.getElementById('okMsg').style.display='block'}dp=null})}});
-  var isIos=/iPad|iPhone|iPod/.test(navigator.userAgent)&&!window.MSStream;
-  if(isIos&&!window.navigator.standalone){document.getElementById('btnInstall').style.display='block';document.getElementById('btnInstall').onclick=function(){document.getElementById('guideIos').style.display='block'}}
-  window.addEventListener('appinstalled',function(){document.getElementById('btnInstall').style.display='none';document.getElementById('okMsg').style.display='block'});
-}
-
-// Service worker
+var wixUrl='https://www.minkahostel.com/?t='+encodeURIComponent(token);
+document.getElementById('btnDoor').href=wixUrl;
 if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(function(){});
+var dp=null;
+window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();dp=e;document.getElementById('btnInstall').style.display='block'});
+document.getElementById('btnInstall').addEventListener('click',function(){if(dp){dp.prompt();dp.userChoice.then(function(r){if(r.outcome==='accepted'){document.getElementById('btnInstall').style.display='none';document.getElementById('okMsg').style.display='block'}dp=null})}});
+var isIos=/iPad|iPhone|iPod/.test(navigator.userAgent)&&!window.MSStream;
+if(isIos&&!window.navigator.standalone){document.getElementById('btnInstall').style.display='block';document.getElementById('btnInstall').onclick=function(){document.getElementById('guideIos').style.display='block'}}
+window.addEventListener('appinstalled',function(){document.getElementById('btnInstall').style.display='none';document.getElementById('okMsg').style.display='block'});
 })();
 </script>
 </body>
