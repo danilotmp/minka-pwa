@@ -28,6 +28,7 @@ p{font-size:13px;color:#666;line-height:1.5;margin-bottom:20px}
 .loading .sp{width:36px;height:36px;border:3px solid rgba(255,255,255,.2);border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 12px}
 .loading p{color:rgba(255,255,255,.6);font-size:11px}
 @keyframes spin{to{transform:rotate(360deg)}}
+#pwaFrame{display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;border:0;z-index:99999}
 </style>
 <script>
 // Detección inmediata ANTES de renderizar el body
@@ -36,9 +37,10 @@ var isStandalone=window.matchMedia('(display-mode: standalone)').matches||(windo
 var token=new URLSearchParams(window.location.search).get('t')||localStorage.getItem('minka_door_token')||'';
 if(isStandalone&&token){
 document.documentElement.style.background='#3d4a5c';
-document.open();
-document.write('<html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><meta name="theme-color" content="#3d4a5c"><link rel="manifest" href="manifest.json"><title>Minka Door</title><style>*{margin:0;padding:0}html,body{width:100%;height:100%;overflow:hidden;background:#3d4a5c}iframe{position:fixed;top:0;left:0;width:100%;height:100%;border:3px solid red;transform:scale(1.1);transform-origin:top left}</style></head><body><iframe src="https://www.minkahostel.com/?t='+encodeURIComponent(token)+'" allow="geolocation *; camera *" allowfullscreen></iframe><script>if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js").catch(function(){});history.pushState({p:1},"","");var _lt=0;window.addEventListener("popstate",function(e){var n=Date.now();if(n-_lt<800)return;_lt=n;history.pushState({p:1},"","")});<\/script></body></html>');
-document.close();
+document.documentElement.style.overflow='hidden';
+// Marcar para activar iframe después
+document.documentElement.setAttribute('data-pwa','1');
+document.documentElement.setAttribute('data-token',token);
 }
 })();
 </script>
@@ -53,9 +55,30 @@ document.close();
 <div class="guide" id="guideIos"><strong>Para instalar en iPhone/iPad:</strong><br>1. Toca el icono compartir ↑<br>2. "Agregar a pantalla de inicio"<br>3. "Agregar"<br><br><span style="color:#999;font-size:10px"><strong>iPhone/iPad:</strong> Tap share ↑ → Add to Home Screen → Add</span></div>
 <div class="ok-msg" id="okMsg">✓ Instalado.<br><span style="font-size:10px;opacity:.8">Installed. Open from home screen.</span></div>
 </div>
+<iframe id="pwaFrame" allow="geolocation *; camera *" allowfullscreen></iframe>
 <script>
+(function(){
+var isPwa=document.documentElement.getAttribute('data-pwa')==='1';
+var token=document.documentElement.getAttribute('data-token')||'';
+
+if(isPwa&&token){
+  // Ocultar card, mostrar iframe
+  document.getElementById('mainCard').style.display='none';
+  document.body.style.cssText='margin:0;padding:0;overflow:hidden;background:#3d4a5c';
+  var f=document.getElementById('pwaFrame');
+  f.style.display='block';
+  f.src='https://www.minkahostel.com/?t='+encodeURIComponent(token);
+  // Historial
+  history.pushState({p:1},'','');
+  var _lt=0;
+  window.addEventListener('popstate',function(e){var n=Date.now();if(n-_lt<800)return;_lt=n;history.pushState({p:1},'','')});
+  if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(function(){});
+  return;
+}
+
+// Modo normal
 var p=new URLSearchParams(window.location.search);
-var token=p.get('t')||localStorage.getItem('minka_door_token')||'';
+token=p.get('t')||localStorage.getItem('minka_door_token')||'';
 if(p.get('t'))localStorage.setItem('minka_door_token',token);
 if(!token){var uuid=p.get('door')||'';var key=p.get('key')||'';if(uuid){token=btoa(uuid+'|'+key);localStorage.setItem('minka_door_token',token)}}
 var wixUrl='https://www.minkahostel.com/?t='+encodeURIComponent(token);
@@ -67,6 +90,7 @@ document.getElementById('btnInstall').addEventListener('click',function(){if(dp)
 var isIos=/iPad|iPhone|iPod/.test(navigator.userAgent)&&!window.MSStream;
 if(isIos&&!window.navigator.standalone){document.getElementById('btnInstall').style.display='block';document.getElementById('btnInstall').onclick=function(){document.getElementById('guideIos').style.display='block'}}
 window.addEventListener('appinstalled',function(){document.getElementById('btnInstall').style.display='none';document.getElementById('okMsg').style.display='block'});
+})();
 </script>
 </body>
 </html>
