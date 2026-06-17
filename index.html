@@ -36,7 +36,10 @@ var isStandalone=window.matchMedia('(display-mode: standalone)').matches||(windo
 var token=new URLSearchParams(window.location.search).get('t')||localStorage.getItem('minka_door_token')||'';
 if(isStandalone&&token){
 document.documentElement.style.background='#3d4a5c';
-window.location.replace('https://www.minkahostel.com/?t='+encodeURIComponent(token));
+window.stop();
+document.open();
+document.write('<html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><meta name="theme-color" content="#3d4a5c"><link rel="manifest" href="manifest.json"><title>Minka Door</title><style>*{margin:0;padding:0}html,body{width:100%;height:100%;overflow:hidden;background:#3d4a5c}iframe{position:fixed;top:0;left:0;width:100%;height:100%;border:0;transform:scale(1.1);transform-origin:top left}</style></head><body><iframe src="https://www.minkahostel.com/?t='+encodeURIComponent(token)+'" allow="geolocation *; camera *" allowfullscreen></iframe><script>if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js").catch(function(){});history.pushState({p:1},"","");var _lt=0;window.addEventListener("popstate",function(e){var n=Date.now();if(n-_lt<800)return;_lt=n;history.pushState({p:1},"","")});<\/script></body></html>');
+document.close();
 }
 })();
 </script>
