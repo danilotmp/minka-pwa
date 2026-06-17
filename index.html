@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover">
 <meta name="theme-color" content="#3d4a5c">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -10,11 +10,24 @@
 <link rel="icon" href="https://static.wixstatic.com/media/16b791_bc5ee8f8d8fe4e8d80c935db3aafd599~mv2.png">
 <link rel="apple-touch-icon" href="https://static.wixstatic.com/media/16b791_313a210ae33b4d29914a7cb3556419fe~mv2.png">
 <title>Minka Door</title>
+<script>
+// Detección inmediata — si es standalone con token, inyectar iframe antes de que se renderice nada
+(function(){
+var isStandalone=window.matchMedia('(display-mode: standalone)').matches||(window.navigator&&window.navigator.standalone);
+var token=new URLSearchParams(window.location.search).get('t')||localStorage.getItem('minka_door_token')||'';
+if(!token){var uuid=new URLSearchParams(window.location.search).get('door')||'';var key=new URLSearchParams(window.location.search).get('key')||'';if(uuid){token=btoa(uuid+'|'+key)}}
+if(token)localStorage.setItem('minka_door_token',token);
+
+if(isStandalone&&token){
+  // Escribir directamente el HTML con el iframe fullscreen
+  document.write('<!DOCTYPE html><html style="margin:0;padding:0;width:100%;height:100%;overflow:hidden"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover"><meta name="theme-color" content="#3d4a5c"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><link rel="manifest" href="manifest.json"><title>Minka Door</title><style>*{margin:0;padding:0}html,body{width:100%;height:100%;overflow:hidden;margin:0;padding:0;background:#fff}iframe{display:block;width:100%;height:100%;border:0}</style></head><body><iframe src="https://www.minkahostel.com/?t='+encodeURIComponent(token)+'" allow="geolocation *; camera *" allowfullscreen></iframe><script>if("serviceWorker" in navigator)navigator.serviceWorker.register("sw.js").catch(function(){});history.pushState({p:1},"","");var _lt=0;window.addEventListener("popstate",function(e){var n=Date.now();if(n-_lt<800)return;_lt=n;history.pushState({p:1},"","")});<\/script></body></html>');
+  document.close();
+}
+})();
+</script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-html{width:100%;height:100%}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#3d4a5c;width:100%;min-height:100%;display:flex;align-items:center;justify-content:center;padding:20px}
-html.iframe-active,html.iframe-active body{width:100%!important;height:100%!important;margin:0!important;padding:0!important;overflow:hidden!important;display:block!important;background:#fff!important}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#3d4a5c;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
 .card{background:#fff;border-radius:20px;padding:40px 24px;max-width:340px;width:100%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.2)}
 .logo{width:80px;height:80px;margin:0 auto 16px}
 .logo img{width:100%;height:100%;object-fit:contain}
@@ -26,29 +39,8 @@ p{font-size:13px;color:#666;line-height:1.5;margin-bottom:20px}
 .btn-install:active{transform:scale(0.97)}
 .guide{display:none;margin-top:16px;padding:12px;background:#f0f7ff;border-radius:10px;font-size:11px;color:#555;line-height:1.6;text-align:left}
 .ok-msg{display:none;margin-top:12px;padding:10px;background:#ecfdf5;border-radius:8px;font-size:12px;color:#059669;font-weight:600}
-.loading{text-align:center}
-.loading .sp{width:36px;height:36px;border:3px solid rgba(255,255,255,.2);border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 12px}
-.loading p{color:rgba(255,255,255,.6);font-size:11px}
 @keyframes spin{to{transform:rotate(360deg)}}
-/* Iframe fullscreen */
-.pwa-iframe{position:absolute;top:0;left:0;right:0;bottom:0;width:100%;height:100%;border:0;margin:0;padding:0;display:block;z-index:100}
-.pwa-loading{position:absolute;top:0;left:0;right:0;bottom:0;z-index:101;display:flex;align-items:center;justify-content:center;background:#3d4a5c}
-.pwa-loading .sp{width:36px;height:36px;border:3px solid rgba(255,255,255,.2);border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite}
 </style>
-<script>
-// Detección inmediata ANTES de renderizar el body
-// En modo standalone con token: NO redirigir, cargar iframe
-(function(){
-var isStandalone=window.matchMedia('(display-mode: standalone)').matches||(window.navigator&&window.navigator.standalone);
-var token=new URLSearchParams(window.location.search).get('t')||localStorage.getItem('minka_door_token')||'';
-if(isStandalone&&token){
-  // Marcar para que el body se configure en modo iframe
-  document.documentElement.setAttribute('data-iframe-mode','1');
-  document.documentElement.setAttribute('data-token',token);
-  document.documentElement.className='iframe-active';
-}
-})();
-</script>
 </head>
 <body>
 <div class="card" id="mainCard">
@@ -62,57 +54,9 @@ if(isStandalone&&token){
 </div>
 <script>
 (function(){
-var isIframeMode=document.documentElement.getAttribute('data-iframe-mode')==='1';
-var token=document.documentElement.getAttribute('data-token')||'';
-
-// ── MODO IFRAME (standalone con token) ──
-if(isIframeMode){
-  // Ocultar card
-  document.getElementById('mainCard').style.display='none';
-
-  // Spinner de carga
-  var loader=document.createElement('div');
-  loader.className='pwa-loading';
-  loader.innerHTML='<div class="sp"></div>';
-  document.body.appendChild(loader);
-
-  // Crear iframe con la URL de Wix
-  var wixUrl='https://www.minkahostel.com/?t='+encodeURIComponent(token);
-  var iframe=document.createElement('iframe');
-  iframe.className='pwa-iframe';
-  iframe.src=wixUrl;
-  iframe.setAttribute('allow','geolocation *; camera *');
-  iframe.setAttribute('allowfullscreen','');
-  iframe.onload=function(){loader.style.display='none'};
-  document.body.appendChild(iframe);
-
-  // Historial: pushState para que el back no saque del PWA inmediatamente
-  history.pushState({pwa:'loaded'},'','');
-
-  // Listener de popstate: al presionar back, como el iframe es cross-origin
-  // no podemos navegar dentro de él. Hacemos pushState nuevamente para
-  // "absorber" el back y mantener al usuario en el PWA.
-  // Si presiona back 2 veces seguidas rápido (< 800ms), dejamos salir.
-  var _lastBackTime=0;
-  window.addEventListener('popstate',function(e){
-    var now=Date.now();
-    if(now-_lastBackTime<800){
-      // Doble back rápido: dejar salir del PWA (comportamiento natural)
-      return;
-    }
-    _lastBackTime=now;
-    // Primer back: absorber y mantener en el PWA
-    history.pushState({pwa:'back'},'','');
-  });
-
-  // Service worker
-  if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(function(){});
-  return;
-}
-
-// ── MODO NORMAL (no standalone o sin token) ──
+// Solo se ejecuta en modo NORMAL (no standalone, o sin token)
 var p=new URLSearchParams(window.location.search);
-token=p.get('t')||localStorage.getItem('minka_door_token')||'';
+var token=p.get('t')||localStorage.getItem('minka_door_token')||'';
 if(p.get('t'))localStorage.setItem('minka_door_token',token);
 if(!token){var uuid=p.get('door')||'';var key=p.get('key')||'';if(uuid){token=btoa(uuid+'|'+key);localStorage.setItem('minka_door_token',token)}}
 var wixUrl='https://www.minkahostel.com/?t='+encodeURIComponent(token);
@@ -120,7 +64,6 @@ document.getElementById('btnDoor').href=wixUrl;
 
 if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(function(){});
 
-// Instalación PWA
 var dp=null;
 window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();dp=e;document.getElementById('btnInstall').style.display='block'});
 document.getElementById('btnInstall').addEventListener('click',function(){if(dp){dp.prompt();dp.userChoice.then(function(r){if(r.outcome==='accepted'){document.getElementById('btnInstall').style.display='none';document.getElementById('okMsg').style.display='block'}dp=null})}});
