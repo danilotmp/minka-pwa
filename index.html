@@ -28,7 +28,7 @@ p{font-size:13px;color:#666;line-height:1.5;margin-bottom:20px}
 .loading .sp{width:36px;height:36px;border:3px solid rgba(255,255,255,.2);border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 12px}
 .loading p{color:rgba(255,255,255,.6);font-size:11px}
 @keyframes spin{to{transform:rotate(360deg)}}
-#pwaFrame{display:none;position:fixed;top:0;left:0;border:0;z-index:99999;transform:scale(1.15);transform-origin:center top;overflow:auto;-webkit-overflow-scrolling:touch}
+#pwaFrame{display:none;position:fixed;top:0;left:50%;border:0;z-index:99999;transform:translateX(-50%) scale(1.2);transform-origin:center top;-webkit-overflow-scrolling:touch}
 </style>
 <script>
 // Detección inmediata ANTES de renderizar el body
@@ -67,10 +67,10 @@ if(isPwa&&token){
   document.body.style.cssText='margin:0;padding:0;overflow:hidden;background:#3d4a5c;width:100%;height:100%';
   var f=document.getElementById('pwaFrame');
   f.style.display='block';
-  // El iframe ocupa toda la pantalla real.
-  // El scale agranda el contenido visualmente — el scroll es del iframe interno (Wix)
-  f.style.width=window.innerWidth+'px';
-  f.style.height=window.innerHeight+'px';
+  // El iframe se escala 1.2 → darle dimensiones reducidas para que al escalar = pantalla
+  var sc=1.2;
+  f.style.width=Math.round(window.innerWidth/sc)+'px';
+  f.style.height=Math.round(window.innerHeight/sc)+'px';
   f.src='https://www.minkahostel.com/?t='+encodeURIComponent(token);
   // Historial
   history.pushState({p:1},'','');
