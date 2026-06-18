@@ -71,21 +71,21 @@ if(isPwa&&token){
   f.style.width=Math.round(window.innerWidth/sc)+'px';
   f.style.height=Math.round(window.innerHeight/1.27)+'px';
 
-  // Cargar iframe INMEDIATAMENTE con token base
-  // La geo se obtiene en paralelo y se pasa como params ocultos (no hay barra URL en standalone)
+  // Obtener geo del PWA y cargar iframe UNA SOLA VEZ
+  // Espera max 1.5s por GPS. Si llega, carga con geo. Si no, carga sin geo.
   var baseUrl='https://www.minkahostel.com/?t='+encodeURIComponent(token);
-  f.src=baseUrl;
+  var _loaded=false;
+  function loadOnce(url){if(_loaded)return;_loaded=true;f.src=url;}
 
-  // Obtener geo fresca en paralelo — si llega rápido, recargar iframe con geo
   if(navigator.geolocation){
+    var _geoTimer=setTimeout(function(){loadOnce(baseUrl)},1500);
     navigator.geolocation.getCurrentPosition(function(pos){
-      // Solo recargar si el iframe aún no ha ejecutado el flujo de apertura (< 8s desde inicio)
-      var geoUrl=baseUrl+'&glat='+pos.coords.latitude+'&glng='+pos.coords.longitude+'&gacc='+Math.round(pos.coords.accuracy);
-      // Actualizar src solo si fue muy rápido (< 3s) — sino Wix ya empezó su validación
-      if(Date.now()-window._pwaStart<3000){f.src=geoUrl;}
-    },function(){},{enableHighAccuracy:true,maximumAge:0,timeout:4000});
+      clearTimeout(_geoTimer);
+      loadOnce(baseUrl+'&glat='+pos.coords.latitude+'&glng='+pos.coords.longitude+'&gacc='+Math.round(pos.coords.accuracy));
+    },function(){clearTimeout(_geoTimer);loadOnce(baseUrl)},{enableHighAccuracy:true,maximumAge:0,timeout:1400});
+  } else {
+    loadOnce(baseUrl);
   }
-  window._pwaStart=Date.now();
 
   // Historial
   history.pushState({p:1},'','');
