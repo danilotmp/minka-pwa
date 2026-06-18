@@ -71,31 +71,21 @@ if(isPwa&&token){
   f.style.width=Math.round(window.innerWidth/sc)+'px';
   f.style.height=Math.round(window.innerHeight/1.27)+'px';
 
-  // Cargar iframe INMEDIATAMENTE
-  // Si el token tiene geo de la última apertura, reemplazar timestamp con NOW
-  // para que Home.js lo considere reciente
-  var finalToken = token;
-  try {
-    var dec = atob(token);
-    var pp = dec.split('|');
-    // Si tiene geo embebida (6 partes: uuid|pass|lat|lng|acc|ts), actualizar timestamp
-    if (pp.length >= 6 && pp[2] && pp[3]) {
-      finalToken = btoa(pp[0]+'|'+pp[1]+'|'+pp[2]+'|'+pp[3]+'|'+pp[4]+'|'+Date.now());
-    }
-  } catch(e) {}
-  f.src='https://www.minkahostel.com/?t='+encodeURIComponent(finalToken);
+  // Cargar iframe INMEDIATAMENTE con token base
+  // La geo se obtiene en paralelo y se pasa como params ocultos (no hay barra URL en standalone)
+  var baseUrl='https://www.minkahostel.com/?t='+encodeURIComponent(token);
+  f.src=baseUrl;
 
-  // En paralelo: obtener geo fresca y guardar token extendido para la próxima apertura
+  // Obtener geo fresca en paralelo — si llega rápido, recargar iframe con geo
   if(navigator.geolocation){
     navigator.geolocation.getCurrentPosition(function(pos){
-      try{
-        var decoded=atob(token);
-        var parts=decoded.split('|');
-        var extended=parts[0]+'|'+(parts[1]||'')+'|'+pos.coords.latitude+'|'+pos.coords.longitude+'|'+Math.round(pos.coords.accuracy)+'|'+Date.now();
-        localStorage.setItem('minka_door_token',btoa(extended));
-      }catch(e){}
-    },function(){},{enableHighAccuracy:true,maximumAge:0,timeout:8000});
+      // Solo recargar si el iframe aún no ha ejecutado el flujo de apertura (< 8s desde inicio)
+      var geoUrl=baseUrl+'&glat='+pos.coords.latitude+'&glng='+pos.coords.longitude+'&gacc='+Math.round(pos.coords.accuracy);
+      // Actualizar src solo si fue muy rápido (< 3s) — sino Wix ya empezó su validación
+      if(Date.now()-window._pwaStart<3000){f.src=geoUrl;}
+    },function(){},{enableHighAccuracy:true,maximumAge:0,timeout:4000});
   }
+  window._pwaStart=Date.now();
 
   // Historial
   history.pushState({p:1},'','');
