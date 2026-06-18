@@ -25,13 +25,31 @@ p{font-size:13px;color:#666;line-height:1.5;margin-bottom:20px}
 .guide{display:none;margin-top:16px;padding:12px;background:#f0f7ff;border-radius:10px;font-size:11px;color:#555;line-height:1.6;text-align:left}
 .ok-msg{display:none;margin-top:12px;padding:10px;background:#ecfdf5;border-radius:8px;font-size:12px;color:#059669;font-weight:600}
 @keyframes spin{to{transform:rotate(360deg)}}
+/* Modo apertura directa (standalone) */
+.door-screen{display:none;width:100%;min-height:100vh;flex-direction:column;align-items:center;justify-content:center;padding:30px 20px;text-align:center}
+.door-screen.active{display:flex}
+.door-spinner{width:48px;height:48px;border:4px solid rgba(255,255,255,.2);border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite;margin-bottom:16px}
+.door-status{font-size:13px;color:rgba(255,255,255,.7);margin-bottom:24px}
+.door-result{background:#fff;border-radius:16px;padding:28px 20px;max-width:340px;width:100%;text-align:center;box-shadow:0 12px 40px rgba(0,0,0,.3);display:none}
+.door-result.show{display:block}
+.door-icon{width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-size:28px;color:#fff}
+.door-icon.success{background:#4CAF50}
+.door-icon.error{background:#E53935}
+.door-icon.warning{background:#FF9800}
+.door-icon.info{background:#1565c0}
+.door-title{font-size:16px;font-weight:700;color:#1e3a5f;margin-bottom:8px}
+.door-msg{font-size:12px;color:#555;line-height:1.6;margin-bottom:16px}
+.door-btn{display:block;width:100%;padding:14px;background:#1a56db;color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;margin-top:10px;text-decoration:none;text-align:center}
+.door-btn.green{background:#00A0B4}
+.room-card{background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;padding:14px;margin-top:12px;text-align:left}
+.room-cat{font-size:14px;font-weight:700;color:#1e3a5f;text-transform:uppercase;margin-bottom:4px}
+.room-detail{font-size:11px;color:#555;line-height:1.6}
+.room-key{font-size:12px;color:#333;margin-top:4px}
 /*
  ═══════════════════════════════════════════════════════════════════
  IFRAME WIX DENTRO DE PWA — PARÁMETROS INAMOVIBLES
- Estos estilos + dimensiones JS están calibrados para que Wix se
- renderice correctamente en fullscreen dentro del iframe PWA.
- - position:fixed + left:50% + translateX(-50%) scale(1.3): centra y escala
- - transform-origin:center top: escala desde arriba
+ - position:fixed + left:50% + translateX(-50%) scale(1.3)
+ - transform-origin:center top
  - JS: width = innerWidth/1.3, height = innerHeight/1.26
  NO MODIFICAR sin probar en dispositivo real.
  ═══════════════════════════════════════════════════════════════════
@@ -60,40 +78,148 @@ if(isStandalone&&token){
 <div class="guide" id="guideIos"><strong>Para instalar en iPhone/iPad:</strong><br>1. Toca el icono compartir ↑<br>2. "Agregar a pantalla de inicio"<br>3. "Agregar"<br><br><span style="color:#999;font-size:10px"><strong>iPhone/iPad:</strong> Tap share ↑ → Add to Home Screen → Add</span></div>
 <div class="ok-msg" id="okMsg">✓ Instalado.<br><span style="font-size:10px;opacity:.8">Installed. Open from home screen.</span></div>
 </div>
+<div class="door-screen" id="doorScreen">
+<div class="door-spinner" id="doorSpinner"></div>
+<div class="door-status" id="doorStatus">Verificando acceso...</div>
+<div class="door-result" id="doorResult">
+  <div class="door-icon" id="doorIcon">✔</div>
+  <div class="door-title" id="doorTitle"></div>
+  <div class="door-msg" id="doorMsg"></div>
+  <div id="doorRoomInfo"></div>
+  <button class="door-btn green" id="doorBtnClose" style="display:none">Cerrar</button>
+</div>
+</div>
 <iframe id="pwaFrame" allow="geolocation *; camera *" allowfullscreen></iframe>
 <script>
 (function(){
 var isPwa=document.documentElement.getAttribute('data-pwa')==='1';
 var token=document.documentElement.getAttribute('data-token')||'';
+var API_URL='https://www.minkahostel.com/_functions/doorAccess';
 
 if(isPwa&&token){
-  // ═══ MODO STANDALONE: Iframe directo al Home de Wix ═══
+  // ═══ MODO STANDALONE: Widget de apertura ═══
+  // 1. Obtener GPS → 2. Enviar a Wix → 3. Presentar resultado → 4. Cerrar
   document.getElementById('mainCard').style.display='none';
-  document.body.style.cssText='margin:0;padding:0;overflow:hidden;background:#fff;width:100%;height:100%';
+  document.body.style.cssText='margin:0;padding:0;background:#3d4a5c;min-height:100vh;display:flex;align-items:center;justify-content:center';
+  var screen=document.getElementById('doorScreen');
+  screen.classList.add('active');
+  var spinner=document.getElementById('doorSpinner');
+  var statusEl=document.getElementById('doorStatus');
+  var resultEl=document.getElementById('doorResult');
+  var iconEl=document.getElementById('doorIcon');
+  var titleEl=document.getElementById('doorTitle');
+  var msgEl=document.getElementById('doorMsg');
+  var roomInfoEl=document.getElementById('doorRoomInfo');
+  var btnClose=document.getElementById('doorBtnClose');
 
-  // ── IFRAME — PARÁMETROS INAMOVIBLES (ver comentario en CSS) ──
-  var f=document.getElementById('pwaFrame');
-  f.style.display='block';
-  f.style.width=Math.round(window.innerWidth/1.3)+'px';
-  f.style.height=Math.round(window.innerHeight/1.26)+'px';
+  function showResult(type, titleText, msgText, extra){
+    spinner.style.display='none';
+    statusEl.style.display='none';
+    iconEl.className='door-icon '+type;
+    iconEl.textContent=type==='success'?'✔':type==='error'?'✗':type==='warning'?'!':'◎';
+    titleEl.textContent=titleText;
+    msgEl.innerHTML=msgText;
+    if(extra)roomInfoEl.innerHTML=extra;
+    resultEl.classList.add('show');
+    btnClose.style.display='block';
+    btnClose.onclick=function(){window.close();location.reload()};
+  }
 
-  // Obtener geo y pasarlo al Home como query params
-  var wixHome='https://www.minkahostel.com/?t='+encodeURIComponent(token);
+  // Fallback: si fetch falla, abrir iframe al Home
+  function fallbackIframe(){
+    screen.classList.remove('active');
+    document.body.style.cssText='margin:0;padding:0;overflow:hidden;background:#fff;width:100%;height:100%';
+    var f=document.getElementById('pwaFrame');
+    f.style.display='block';
+    f.style.width=Math.round(window.innerWidth/1.3)+'px';
+    f.style.height=Math.round(window.innerHeight/1.26)+'px';
+    var url='https://www.minkahostel.com/?t='+encodeURIComponent(token);
+    if(geoData.lat)url+='&glat='+geoData.lat+'&glng='+geoData.lng+'&gacc='+Math.round(geoData.acc||0);
+    f.src=url;
+  }
+
+  function callApi(extraParams){
+    statusEl.textContent='Abriendo puerta...';
+    var payload={token:token};
+    if(geoData.lat!==null){payload.lat=geoData.lat;payload.lng=geoData.lng;payload.acc=Math.round(geoData.acc||0)}
+    if(extraParams){for(var k in extraParams)payload[k]=extraParams[k]}
+
+    var controller=new AbortController();
+    var timeoutId=setTimeout(function(){controller.abort()},12000);
+
+    fetch(API_URL,{
+      method:'POST',
+      headers:{'Content-Type':'text/plain'},
+      body:JSON.stringify(payload),
+      signal:controller.signal
+    })
+    .then(function(r){clearTimeout(timeoutId);if(!r.ok)throw new Error('HTTP '+r.status);return r.json()})
+    .then(function(data){handleResponse(data)})
+    .catch(function(e){
+      clearTimeout(timeoutId);
+      // Si fetch falla (CORS, timeout, red) → fallback al iframe
+      fallbackIframe();
+    });
+  }
+
+  function handleResponse(data){
+    if(data.success){
+      var roomHtml='';
+      if(data.firstAccess&&data.roomInfo&&data.roomInfo.length){
+        data.roomInfo.forEach(function(rm){
+          roomHtml+='<div class="room-card">';
+          roomHtml+='<div class="room-cat">'+((rm.categoria||rm.title||'').replace(/-/g,' '))+'</div>';
+          if(rm.ubicacion){
+            var u=rm.ubicacion;
+            if(u.numero)roomHtml+='<div class="room-detail">🛏️ '+(data.lang==='es'?'Habitación N°: ':'Room #: ')+u.numero+(u.piso?' — '+(data.lang==='es'?'Piso ':'Floor ')+u.piso:'')+'</div>';
+            if(u.instrucciones)roomHtml+='<div class="room-detail" style="font-style:italic;margin-top:4px">'+u.instrucciones+'</div>';
+            if(u.claveAcceso)roomHtml+='<div class="room-key">🔑 '+u.claveAcceso+'</div>';
+          }
+          roomHtml+='</div>';
+        });
+      }
+      var t=data.firstAccess?(data.lang==='es'?'¡Bienvenido, '+data.name+'!':'Welcome, '+data.name+'!'):(data.lang==='es'?'Acceso concedido':'Access granted');
+      var m=data.firstAccess?(data.lang==='es'?'Aquí está la info de tu habitación.<br><b>Por seguridad:</b> mantén la puerta cerrada.':'Here is your room info.<br><b>For security:</b> keep the door closed.'):(data.lang==='es'?'<b>Por seguridad:</b> mantén la puerta cerrada.':'<b>For security:</b> keep the door closed.');
+      showResult('success',t,m,roomHtml);
+      return;
+    }
+    // Mapear errores
+    var err=data.error,type='error',title=data.message||'Error',msg='';
+    if(err==='GEO_FAR'){type='info';title=data.lang==='es'?'Fuera de rango':'Out of range';msg=(data.lang==='es'?'Acércate a la puerta del hotel e intenta de nuevo.':'Get closer to the hotel door and try again.')+'<br><span style="font-size:10px;color:#999">'+(data.lang==='es'?'Distancia':'Distance')+': '+(data.distance||'?')+'m</span>';}
+    else if(err==='CHECKIN_REQUIRED'){type='warning';title=data.lang==='es'?'Check-in requerido':'Check-in required';msg=data.message;}
+    else if(err==='BALANCE_WARNING'){
+      type='warning';title=data.lang==='es'?'Saldo pendiente':'Pending balance';msg=data.message;
+      var btnOpen=document.createElement('button');btnOpen.className='door-btn green';btnOpen.textContent=data.lang==='es'?'🔓 Abrir de todos modos':'🔓 Open anyway';
+      btnOpen.onclick=function(){resultEl.classList.remove('show');spinner.style.display='block';statusEl.style.display='block';callApi({confirmBalance:true})};
+      roomInfoEl.innerHTML='';roomInfoEl.appendChild(btnOpen);
+      showResult(type,title,msg,'');btnClose.style.display='block';return;
+    }
+    else if(err==='BALANCE_CHECKOUT'||err==='ENDED_BALANCE'||err==='DC_ENDED_BALANCE'||err==='DC_LAST_HOUR'){type='warning';title=data.lang==='es'?'Saldo pendiente':'Pending balance';msg=data.message;}
+    else if(err==='DC_NOT_STARTED'){type='info';title=data.lang==='es'?'Horario no disponible':'Schedule not available';msg=data.message;}
+    else if(err==='DC_ENDED'||err==='ENDED'){type='success';title=data.lang==='es'?'Finalizado':'Ended';msg=data.message;}
+    else if(err==='CANCELLED'){type='error';title=data.lang==='es'?'Reserva cancelada':'Reservation cancelled';msg=data.message;}
+    else if(err==='DISABLED'){type='warning';title=data.lang==='es'?'Acceso deshabilitado':'Access disabled';msg=data.message;}
+    else if(err==='DOOR_FAIL'){type='error';title=data.lang==='es'?'No se pudo abrir':'Could not open';msg=data.lang==='es'?'Presiona el timbre frente a la cámara y espera autorización.':'Press the doorbell in front of the camera and wait for authorization.';}
+    else if(err==='GEO_REQUIRED'){type='warning';title=data.lang==='es'?'Ubicación requerida':'Location required';msg=data.lang==='es'?'Activa la ubicación para este sitio.':'Enable location for this site.';}
+    else{msg=data.message||'';}
+    showResult(type,title,msg,'');
+  }
+
+  // ── Obtener GPS ──
+  statusEl.textContent='Obteniendo ubicación...';
+  var geoData={lat:null,lng:null,acc:null};
 
   if(navigator.geolocation){
     navigator.geolocation.getCurrentPosition(
-      function(pos){
-        wixHome+='&glat='+pos.coords.latitude+'&glng='+pos.coords.longitude+'&gacc='+Math.round(pos.coords.accuracy);
-        f.src=wixHome;
-      },
+      function(pos){geoData.lat=pos.coords.latitude;geoData.lng=pos.coords.longitude;geoData.acc=pos.coords.accuracy;callApi()},
       function(){
-        // Geo denegada: abrir igual, el Home pedirá geo por su cuenta
-        f.src=wixHome;
+        // Geo denegada: intentar sin geo (el backend decidirá)
+        callApi();
       },
-      {enableHighAccuracy:true,maximumAge:0,timeout:6000}
+      {enableHighAccuracy:true,maximumAge:0,timeout:8000}
     );
   } else {
-    f.src=wixHome;
+    callApi();
   }
 
   // Prevenir back
