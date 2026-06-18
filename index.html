@@ -87,32 +87,32 @@ if(isStandalone&&token){
 (function(){
 var isPwa=document.documentElement.getAttribute('data-pwa')==='1';
 var token=document.documentElement.getAttribute('data-token')||'';
+var API_URL='https://www.minkahostel.com/_functions/doorAccess';
 
 if(isPwa&&token){
-  // ═══ MODO APERTURA DIRECTA ═══
+  // ═══ MODO APERTURA DIRECTA (PWA Standalone) ═══
   document.getElementById('mainCard').style.display='none';
   document.body.style.cssText='margin:0;padding:0;background:#3d4a5c;min-height:100vh;display:flex;align-items:center;justify-content:center';
   var screen=document.getElementById('doorScreen');
   screen.classList.add('active');
   var spinner=document.getElementById('doorSpinner');
-  var status=document.getElementById('doorStatus');
-  var result=document.getElementById('doorResult');
-  var icon=document.getElementById('doorIcon');
-  var title=document.getElementById('doorTitle');
-  var msg=document.getElementById('doorMsg');
+  var statusEl=document.getElementById('doorStatus');
+  var resultEl=document.getElementById('doorResult');
+  var iconEl=document.getElementById('doorIcon');
+  var titleEl=document.getElementById('doorTitle');
+  var msgEl=document.getElementById('doorMsg');
   var roomInfoEl=document.getElementById('doorRoomInfo');
   var btnSite=document.getElementById('doorBtnSite');
 
   function showResult(type, titleText, msgText, extra){
     spinner.style.display='none';
-    status.style.display='none';
-    icon.className='door-icon '+type;
-    icon.textContent=type==='success'?'✔':type==='error'?'✗':type==='warning'?'!':'◎';
-    title.textContent=titleText;
-    msg.innerHTML=msgText;
+    statusEl.style.display='none';
+    iconEl.className='door-icon '+type;
+    iconEl.textContent=type==='success'?'✔':type==='error'?'✗':type==='warning'?'!':'◎';
+    titleEl.textContent=titleText;
+    msgEl.innerHTML=msgText;
     if(extra)roomInfoEl.innerHTML=extra;
-    result.classList.add('show');
-    // Mostrar botón "Ver Hotel" — abre la página de Minka en el iframe
+    resultEl.classList.add('show');
     btnSite.style.display='block';
     btnSite.href='#';
     btnSite.onclick=function(e){e.preventDefault();showWixIframe()};
@@ -129,90 +129,153 @@ if(isPwa&&token){
     f.src='https://www.minkahostel.com/?t='+encodeURIComponent(token);
   }
 
-  // Paso 1: Obtener GPS fresco
-  status.textContent='Obteniendo ubicación...';
-  var geoData={lat:null,lng:null,acc:null};
+  /**
+   * Llama al endpoint POST /_functions/doorAccess.
+   * Usa Content-Type: text/plain para evitar CORS preflight.
+   * (text/plain es "simple request" — no dispara OPTIONS)
+   */
+  function callApi(extraParams){
+    statusEl.textContent='Abriendo puerta...';
+    var payload={token:token};
+    if(geoData.lat!==null){payload.lat=geoData.lat;payload.lng=geoData.lng;payload.acc=Math.round(geoData.acc||0)}
+    if(extraParams){for(var k in extraParams)payload[k]=extraParams[k]}
 
-  function callApi(){
-    status.textContent='Abriendo puerta...';
-    var apiUrl='https://www.minkahostel.com/_functions/doorAccess?token='+encodeURIComponent(token);
-    if(geoData.lat)apiUrl+='&lat='+geoData.lat+'&lng='+geoData.lng+'&acc='+Math.round(geoData.acc||0);
-    fetch(apiUrl)
-    .then(function(r){if(!r.ok){throw new Error('HTTP '+r.status)}return r.json()})
-    .then(function(data){
-      if(data.success){
-        var roomHtml='';
-        if(data.firstAccess&&data.roomInfo&&data.roomInfo.length){
-          data.roomInfo.forEach(function(rm){
-            roomHtml+='<div class="room-card">';
-            roomHtml+='<div class="room-cat">'+((rm.categoria||rm.title||'').replace(/-/g,' '))+'</div>';
-            if(rm.ubicacion){
-              var u=rm.ubicacion;
-              if(u.numero)roomHtml+='<div class="room-detail">🛏️ '+(data.lang==='es'?'Habitación N°: ':'Room #: ')+u.numero+(u.piso?' — '+(data.lang==='es'?'Piso ':'Floor ')+u.piso:'')+'</div>';
-              if(u.instrucciones)roomHtml+='<div class="room-detail" style="font-style:italic;margin-top:4px">'+u.instrucciones+'</div>';
-              if(u.claveAcceso)roomHtml+='<div class="room-key">🔑 '+u.claveAcceso+'</div>';
-            }
-            roomHtml+='</div>';
-          });
-        }
-        var titleTxt=data.firstAccess?(data.lang==='es'?'¡Bienvenido, '+data.name+'!':'Welcome, '+data.name+'!'):(data.lang==='es'?'Acceso concedido':'Access granted');
-        var msgTxt=data.firstAccess?(data.lang==='es'?'Aquí está la info de tu habitación.<br><b>Por seguridad:</b> mantén la puerta cerrada.':'Here is your room info.<br><b>For security:</b> keep the door closed.'):(data.lang==='es'?'<b>Por seguridad:</b> mantén la puerta cerrada.':'<b>For security:</b> keep the door closed.');
-        showResult('success',titleTxt,msgTxt,roomHtml);
-      } else {
-        var errType='error';
-        var errTitle=data.message||'Error';
-        var errMsg='';
-        // Mapear errores a UI
-        if(data.error==='GEO_FAR'){errType='info';errTitle=data.lang==='es'?'Fuera de rango':'Out of range';errMsg=(data.lang==='es'?'Acércate a la puerta del hotel e intenta de nuevo.':'Get closer to the hotel door and try again.')+'<br><span style="font-size:10px;color:#999">'+(data.lang==='es'?'Distancia':'Distance')+': '+(data.distance||'?')+'m</span>';}
-        else if(data.error==='CHECKIN_REQUIRED'){errType='warning';errTitle=data.lang==='es'?'Check-in requerido':'Check-in required';errMsg=data.message;btnSite.textContent='📋 Check-in';btnSite.style.display='block';btnSite.onclick=function(e){e.preventDefault();window.location.href='https://www.minkahostel.com/checkin?id='+(data.uuid||'')+'&returnDoor=1&msg=checkin'}}
-        else if(data.error==='BALANCE_WARNING'){
-          // Permitir abrir con confirmación
-          errType='warning';errTitle=data.lang==='es'?'Saldo pendiente':'Pending balance';errMsg=data.message;
-          var btnOpen=document.createElement('button');btnOpen.className='door-btn green';btnOpen.textContent=data.lang==='es'?'🔓 Abrir de todos modos':'🔓 Open anyway';
-          btnOpen.onclick=function(){result.classList.remove('show');spinner.style.display='block';status.style.display='block';status.textContent=data.lang==='es'?'Abriendo puerta...':'Opening door...';
-            var confirmUrl='https://www.minkahostel.com/_functions/doorAccess?token='+encodeURIComponent(token)+'&lat='+geoData.lat+'&lng='+geoData.lng+'&acc='+Math.round(geoData.acc||0)+'&confirm=1';
-            fetch(confirmUrl).then(function(r){return r.json()}).then(function(d2){
-              if(d2.success){showResult('success',d2.lang==='es'?'Acceso concedido':'Access granted',d2.lang==='es'?'<b>Por seguridad:</b> mantén la puerta cerrada.':'<b>For security:</b> keep the door closed.','')}
-              else{showResult('error',d2.message||'Error','','')}
-            }).catch(function(){showResult('error','Error','','')})};
-          roomInfoEl.innerHTML='';roomInfoEl.appendChild(btnOpen);
-        }
-        else if(data.error==='BALANCE_CHECKOUT'||data.error==='ENDED_BALANCE'||data.error==='DC_ENDED_BALANCE'||data.error==='DC_LAST_HOUR'){errType='warning';errTitle=data.lang==='es'?'Saldo pendiente':'Pending balance';errMsg=data.message;}
-        else if(data.error==='DC_NOT_STARTED'){errType='info';errTitle=data.lang==='es'?'Horario no disponible':'Schedule not available';errMsg=data.message;}
-        else if(data.error==='DC_ENDED'||data.error==='ENDED'){errType='success';errTitle=data.lang==='es'?'Finalizado':'Ended';errMsg=data.message;}
-        else if(data.error==='CANCELLED'){errType='error';errTitle=data.lang==='es'?'Reserva cancelada':'Reservation cancelled';errMsg=data.message;}
-        else if(data.error==='DISABLED'){errType='warning';errMsg=data.message;}
-        else if(data.error==='DOOR_FAIL'){errType='error';errTitle=data.lang==='es'?'No se pudo abrir':'Could not open';errMsg=(data.lang==='es'?'Presiona el timbre frente a la cámara y espera autorización.':'Press the doorbell in front of the camera and wait for authorization.');}
-        else if(data.error==='GEO_REQUIRED'){errType='warning';errTitle=data.lang==='es'?'Ubicación requerida':'Location required';errMsg=data.lang==='es'?'Activa la ubicación para este sitio.':'Enable location for this site.';}
-        else{errMsg=data.message||'';}
-        if(data.error!=='BALANCE_WARNING')showResult(errType,errTitle,errMsg,'');
-      }
+    fetch(API_URL,{
+      method:'POST',
+      headers:{'Content-Type':'text/plain'},
+      body:JSON.stringify(payload)
     })
+    .then(function(r){
+      if(!r.ok)throw new Error('HTTP '+r.status);
+      return r.json();
+    })
+    .then(function(data){handleResponse(data)})
     .catch(function(e){
       showResult('error','Error de conexión','No se pudo conectar con el servidor.<br><span style="font-size:9px;color:#999">'+e.message+'</span>','');
     });
   }
 
-  // Obtener geo con maximumAge:0 (fuerza GPS real)
+  function handleResponse(data){
+    if(data.success){
+      var roomHtml='';
+      if(data.firstAccess&&data.roomInfo&&data.roomInfo.length){
+        data.roomInfo.forEach(function(rm){
+          roomHtml+='<div class="room-card">';
+          roomHtml+='<div class="room-cat">'+((rm.categoria||rm.title||'').replace(/-/g,' '))+'</div>';
+          if(rm.ubicacion){
+            var u=rm.ubicacion;
+            if(u.numero)roomHtml+='<div class="room-detail">🛏️ '+(data.lang==='es'?'Habitación N°: ':'Room #: ')+u.numero+(u.piso?' — '+(data.lang==='es'?'Piso ':'Floor ')+u.piso:'')+'</div>';
+            if(u.instrucciones)roomHtml+='<div class="room-detail" style="font-style:italic;margin-top:4px">'+u.instrucciones+'</div>';
+            if(u.claveAcceso)roomHtml+='<div class="room-key">🔑 '+u.claveAcceso+'</div>';
+          }
+          roomHtml+='</div>';
+        });
+      }
+      var titleTxt=data.firstAccess?(data.lang==='es'?'¡Bienvenido, '+data.name+'!':'Welcome, '+data.name+'!'):(data.lang==='es'?'Acceso concedido':'Access granted');
+      var msgTxt=data.firstAccess?(data.lang==='es'?'Aquí está la info de tu habitación.<br><b>Por seguridad:</b> mantén la puerta cerrada.':'Here is your room info.<br><b>For security:</b> keep the door closed.'):(data.lang==='es'?'<b>Por seguridad:</b> mantén la puerta cerrada.':'<b>For security:</b> keep the door closed.');
+      showResult('success',titleTxt,msgTxt,roomHtml);
+      return;
+    }
+
+    // ── Mapear errores a UI ──
+    var errType='error',errTitle=data.message||'Error',errMsg='';
+
+    if(data.error==='GEO_FAR'){
+      errType='info';
+      errTitle=data.lang==='es'?'Fuera de rango':'Out of range';
+      errMsg=(data.lang==='es'?'Acércate a la puerta del hotel e intenta de nuevo.':'Get closer to the hotel door and try again.')+'<br><span style="font-size:10px;color:#999">'+(data.lang==='es'?'Distancia':'Distance')+': '+(data.distance||'?')+'m</span>';
+    }
+    else if(data.error==='CHECKIN_REQUIRED'){
+      errType='warning';
+      errTitle=data.lang==='es'?'Check-in requerido':'Check-in required';
+      errMsg=data.message;
+      btnSite.textContent='📋 Check-in';
+      btnSite.style.display='block';
+      btnSite.onclick=function(e){e.preventDefault();window.location.href='https://www.minkahostel.com/checkin?id='+(data.uuid||'')+'&returnDoor=1&msg=checkin'};
+    }
+    else if(data.error==='BALANCE_WARNING'){
+      errType='warning';
+      errTitle=data.lang==='es'?'Saldo pendiente':'Pending balance';
+      errMsg=data.message;
+      var btnOpen=document.createElement('button');
+      btnOpen.className='door-btn green';
+      btnOpen.textContent=data.lang==='es'?'🔓 Abrir de todos modos':'🔓 Open anyway';
+      btnOpen.onclick=function(){
+        resultEl.classList.remove('show');
+        spinner.style.display='block';
+        statusEl.style.display='block';
+        statusEl.textContent=data.lang==='es'?'Abriendo puerta...':'Opening door...';
+        callApi({confirmBalance:true});
+      };
+      roomInfoEl.innerHTML='';
+      roomInfoEl.appendChild(btnOpen);
+    }
+    else if(data.error==='BALANCE_CHECKOUT'||data.error==='ENDED_BALANCE'||data.error==='DC_ENDED_BALANCE'||data.error==='DC_LAST_HOUR'){
+      errType='warning';
+      errTitle=data.lang==='es'?'Saldo pendiente':'Pending balance';
+      errMsg=data.message;
+    }
+    else if(data.error==='DC_NOT_STARTED'){
+      errType='info';
+      errTitle=data.lang==='es'?'Horario no disponible':'Schedule not available';
+      errMsg=data.message;
+    }
+    else if(data.error==='DC_ENDED'||data.error==='ENDED'){
+      errType='success';
+      errTitle=data.lang==='es'?'Finalizado':'Ended';
+      errMsg=data.message;
+    }
+    else if(data.error==='CANCELLED'){
+      errType='error';
+      errTitle=data.lang==='es'?'Reserva cancelada':'Reservation cancelled';
+      errMsg=data.message;
+    }
+    else if(data.error==='DISABLED'){
+      errType='warning';
+      errMsg=data.message;
+    }
+    else if(data.error==='DOOR_FAIL'){
+      errType='error';
+      errTitle=data.lang==='es'?'No se pudo abrir':'Could not open';
+      errMsg=data.lang==='es'?'Presiona el timbre frente a la cámara y espera autorización.':'Press the doorbell in front of the camera and wait for authorization.';
+    }
+    else if(data.error==='GEO_REQUIRED'){
+      errType='warning';
+      errTitle=data.lang==='es'?'Ubicación requerida':'Location required';
+      errMsg=data.lang==='es'?'Activa la ubicación para este sitio.':'Enable location for this site.';
+    }
+    else{errMsg=data.message||'';}
+
+    if(data.error!=='BALANCE_WARNING')showResult(errType,errTitle,errMsg,'');
+  }
+
+  // ── Obtener GPS fresco ──
+  statusEl.textContent='Obteniendo ubicación...';
+  var geoData={lat:null,lng:null,acc:null};
+
   if(navigator.geolocation){
     navigator.geolocation.getCurrentPosition(
-      function(pos){geoData.lat=pos.coords.latitude;geoData.lng=pos.coords.longitude;geoData.acc=pos.coords.accuracy;callApi()},
-      function(err){
-        // Geo denegada: mostrar error, no llamar al endpoint
+      function(pos){
+        geoData.lat=pos.coords.latitude;
+        geoData.lng=pos.coords.longitude;
+        geoData.acc=pos.coords.accuracy;
+        callApi();
+      },
+      function(){
         showResult('warning',
           'Ubicación requerida',
           'Por seguridad, esta opción requiere permisos de ubicación.<br><br>Activa la ubicación en la configuración de tu navegador para este sitio y vuelve a intentar.<br><br><span style="color:#999;font-size:10px">Location required. Enable location permissions and try again.</span>','');
       },
-      {enableHighAccuracy:true,maximumAge:0,timeout:6000}
+      {enableHighAccuracy:true,maximumAge:0,timeout:8000}
     );
   } else {
     showResult('warning','Ubicación no disponible','Tu dispositivo no soporta geolocalización.','');
   }
 
-  // Historial
+  // Prevenir back (cierra PWA)
   history.pushState({p:1},'','');
   var _lt=0;
-  window.addEventListener('popstate',function(e){var n=Date.now();if(n-_lt<800)return;_lt=n;history.pushState({p:1},'','')});
+  window.addEventListener('popstate',function(){var n=Date.now();if(n-_lt<800)return;_lt=n;history.pushState({p:1},'','')});
   if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(function(){});
   return;
 }
