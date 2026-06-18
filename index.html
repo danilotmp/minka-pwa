@@ -67,11 +67,54 @@ if(isPwa&&token){
   document.body.style.cssText='margin:0;padding:0;overflow:hidden;background:#fff;width:100%;height:100%';
   var f=document.getElementById('pwaFrame');
   f.style.display='block';
-  // El iframe se escala 1.2 → darle dimensiones reducidas para que al escalar = pantalla
   var sc=1.3;
   f.style.width=Math.round(window.innerWidth/sc)+'px';
   f.style.height=Math.round(window.innerHeight/1.27)+'px';
-  f.src='https://www.minkahostel.com/?t='+encodeURIComponent(token);
+
+  // Obtener geolocalización REAL (sin cache) antes de cargar el iframe
+  // Se usa maximumAge:0 + enableHighAccuracy para forzar lectura fresca del GPS
+  function buildUrlWithGeo(baseToken, lat, lng, acc) {
+    // Decodificar token actual (uuid|pasaporte), agregar geo, re-encodear
+    try {
+      var decoded = atob(baseToken);
+      var parts = decoded.split('|');
+      // Formato: uuid|pasaporte|lat|lng|accuracy|timestamp
+      var extended = parts[0] + '|' + (parts[1]||'') + '|' + lat + '|' + lng + '|' + Math.round(acc) + '|' + Date.now();
+      return 'https://www.minkahostel.com/?t=' + encodeURIComponent(btoa(extended));
+    } catch(e) {
+      return 'https://www.minkahostel.com/?t=' + encodeURIComponent(baseToken);
+    }
+  }
+
+  function loadIframe(url) {
+    f.src = url;
+  }
+
+  // Intentar obtener geo fresca (timeout 5s). Si no se obtiene, carga sin geo.
+  if (navigator.geolocation) {
+    var geoTimeout = setTimeout(function() {
+      // Timeout: cargar sin geo, Wix se encargará
+      loadIframe('https://www.minkahostel.com/?t=' + encodeURIComponent(token));
+    }, 5000);
+
+    navigator.geolocation.getCurrentPosition(
+      function(pos) {
+        clearTimeout(geoTimeout);
+        var url = buildUrlWithGeo(token, pos.coords.latitude, pos.coords.longitude, pos.coords.accuracy);
+        loadIframe(url);
+      },
+      function(err) {
+        clearTimeout(geoTimeout);
+        // Geo denegada o error: cargar sin geo
+        loadIframe('https://www.minkahostel.com/?t=' + encodeURIComponent(token));
+      },
+      { enableHighAccuracy: true, maximumAge: 0, timeout: 4500 }
+    );
+  } else {
+    // Sin soporte de geo: cargar directo
+    loadIframe('https://www.minkahostel.com/?t=' + encodeURIComponent(token));
+  }
+
   // Historial
   history.pushState({p:1},'','');
   var _lt=0;
