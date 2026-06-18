@@ -71,38 +71,30 @@ if(isPwa&&token){
   f.style.width=Math.round(window.innerWidth/sc)+'px';
   f.style.height=Math.round(window.innerHeight/1.27)+'px';
 
-  // Obtener geo fresca en paralelo y construir token extendido
-  // NO bloquear la carga del iframe — si la geo llega antes de que el iframe termine
-  // de navegar, se usa. Si no, Wix calcula la suya.
-  function buildGeoToken(baseToken, lat, lng, acc) {
-    try {
-      var decoded = atob(baseToken);
-      var parts = decoded.split('|');
-      return btoa(parts[0] + '|' + (parts[1]||'') + '|' + lat + '|' + lng + '|' + Math.round(acc) + '|' + Date.now());
-    } catch(e) { return baseToken; }
-  }
+  // Cargar iframe INMEDIATAMENTE
+  // Si el token tiene geo de la última apertura, reemplazar timestamp con NOW
+  // para que Home.js lo considere reciente
+  var finalToken = token;
+  try {
+    var dec = atob(token);
+    var pp = dec.split('|');
+    // Si tiene geo embebida (6 partes: uuid|pass|lat|lng|acc|ts), actualizar timestamp
+    if (pp.length >= 6 && pp[2] && pp[3]) {
+      finalToken = btoa(pp[0]+'|'+pp[1]+'|'+pp[2]+'|'+pp[3]+'|'+pp[4]+'|'+Date.now());
+    }
+  } catch(e) {}
+  f.src='https://www.minkahostel.com/?t='+encodeURIComponent(finalToken);
 
-  // Solicitar geo con maximumAge:0 (fuerza lectura real del GPS, no cache)
-  var geoToken = token;
-  var geoReady = false;
-  if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(
-      function(pos) {
-        geoToken = buildGeoToken(token, pos.coords.latitude, pos.coords.longitude, pos.coords.accuracy);
-        geoReady = true;
-        // Si el iframe aún no ha terminado de cargar la URL, actualizar
-        // (no podemos cambiar src una vez cargado, pero si fue rápido sí)
-        localStorage.setItem('minka_door_token', geoToken);
-      },
-      function(err) { /* Sin geo, Wix la calculará */ },
-      { enableHighAccuracy: true, maximumAge: 0, timeout: 4000 }
-    );
-    // Dar 800ms para que la geo llegue antes de setear el src
-    setTimeout(function() {
-      f.src = 'https://www.minkahostel.com/?t=' + encodeURIComponent(geoReady ? geoToken : token);
-    }, 800);
-  } else {
-    f.src = 'https://www.minkahostel.com/?t=' + encodeURIComponent(token);
+  // En paralelo: obtener geo fresca y guardar token extendido para la próxima apertura
+  if(navigator.geolocation){
+    navigator.geolocation.getCurrentPosition(function(pos){
+      try{
+        var decoded=atob(token);
+        var parts=decoded.split('|');
+        var extended=parts[0]+'|'+(parts[1]||'')+'|'+pos.coords.latitude+'|'+pos.coords.longitude+'|'+Math.round(pos.coords.accuracy)+'|'+Date.now();
+        localStorage.setItem('minka_door_token',btoa(extended));
+      }catch(e){}
+    },function(){},{enableHighAccuracy:true,maximumAge:0,timeout:8000});
   }
 
   // Historial
