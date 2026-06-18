@@ -9,13 +9,13 @@
   "orientation": "portrait",
   "icons": [
     {
-      "src": "https://static.wixstatic.com/media/16b791_40f77bd9ebcf4594896e1689e5fbe8e5~mv2.png",
+      "src": "https://static.wixstatic.com/media/16b791_ec8a2b519def43e9aec669bc98e95e52~mv2.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "https://static.wixstatic.com/media/16b791_40f77bd9ebcf4594896e1689e5fbe8e5~mv2.png",
+      "src": "https://static.wixstatic.com/media/16b791_ec8a2b519def43e9aec669bc98e95e52~mv2.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
