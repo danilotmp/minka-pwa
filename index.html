@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
 <meta name="theme-color" content="#3d4a5c">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -24,30 +24,8 @@ p{font-size:13px;color:#666;line-height:1.5;margin-bottom:20px}
 .btn-install:active{transform:scale(0.97)}
 .guide{display:none;margin-top:16px;padding:12px;background:#f0f7ff;border-radius:10px;font-size:11px;color:#555;line-height:1.6;text-align:left}
 .ok-msg{display:none;margin-top:12px;padding:10px;background:#ecfdf5;border-radius:8px;font-size:12px;color:#059669;font-weight:600}
-@keyframes spin{to{transform:rotate(360deg)}}
-/* Modo apertura directa (standalone) */
-.door-screen{display:none;width:100%;min-height:100vh;flex-direction:column;align-items:center;justify-content:center;padding:30px 20px;text-align:center}
-.door-screen.active{display:flex}
-.door-spinner{width:48px;height:48px;border:4px solid rgba(255,255,255,.2);border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite;margin-bottom:16px}
-.door-status{font-size:13px;color:rgba(255,255,255,.7);margin-bottom:24px}
-.door-result{background:#fff;border-radius:16px;padding:28px 20px;max-width:340px;width:100%;text-align:center;box-shadow:0 12px 40px rgba(0,0,0,.3);display:none}
-.door-result.show{display:block}
-.door-icon{width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-size:28px;color:#fff}
-.door-icon.success{background:#4CAF50}
-.door-icon.error{background:#E53935}
-.door-icon.warning{background:#FF9800}
-.door-icon.info{background:#1565c0}
-.door-title{font-size:16px;font-weight:700;color:#1e3a5f;margin-bottom:8px}
-.door-msg{font-size:12px;color:#555;line-height:1.6;margin-bottom:16px}
-.door-btn{display:block;width:100%;padding:14px;background:#1a56db;color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;margin-top:10px;text-decoration:none;text-align:center}
-.door-btn.green{background:#00A0B4}
-/* Room info card */
-.room-card{background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;padding:14px;margin-top:12px;text-align:left}
-.room-cat{font-size:14px;font-weight:700;color:#1e3a5f;text-transform:uppercase;margin-bottom:4px}
-.room-detail{font-size:11px;color:#555;line-height:1.6}
-.room-key{font-size:12px;color:#333;margin-top:4px}
-/* Iframe (se carga después del resultado) */
-#pwaFrame{display:none;position:fixed;top:0;left:50%;border:0;z-index:99999;transform:translateX(-50%) scale(1.3);transform-origin:center top;-webkit-overflow-scrolling:touch}
+/* Iframe fullscreen para modo standalone */
+#pwaFrame{display:none;position:fixed;top:0;left:0;width:100%;height:100%;border:0;z-index:99999;-webkit-overflow-scrolling:touch}
 </style>
 <script>
 (function(){
@@ -71,205 +49,40 @@ if(isStandalone&&token){
 <div class="guide" id="guideIos"><strong>Para instalar en iPhone/iPad:</strong><br>1. Toca el icono compartir ↑<br>2. "Agregar a pantalla de inicio"<br>3. "Agregar"<br><br><span style="color:#999;font-size:10px"><strong>iPhone/iPad:</strong> Tap share ↑ → Add to Home Screen → Add</span></div>
 <div class="ok-msg" id="okMsg">✓ Instalado.<br><span style="font-size:10px;opacity:.8">Installed. Open from home screen.</span></div>
 </div>
-<div class="door-screen" id="doorScreen">
-<div class="door-spinner" id="doorSpinner"></div>
-<div class="door-status" id="doorStatus">Verificando acceso...</div>
-<div class="door-result" id="doorResult">
-  <div class="door-icon" id="doorIcon">✔</div>
-  <div class="door-title" id="doorTitle"></div>
-  <div class="door-msg" id="doorMsg"></div>
-  <div id="doorRoomInfo"></div>
-  <a class="door-btn green" id="doorBtnSite" href="#" style="display:none">🏠 Ver Hotel</a>
-</div>
-</div>
 <iframe id="pwaFrame" allow="geolocation *; camera *" allowfullscreen></iframe>
 <script>
 (function(){
 var isPwa=document.documentElement.getAttribute('data-pwa')==='1';
 var token=document.documentElement.getAttribute('data-token')||'';
-var API_URL='https://www.minkahostel.com/_functions/doorAccess';
 
 if(isPwa&&token){
-  // ═══ MODO APERTURA DIRECTA (PWA Standalone) ═══
+  // ═══ MODO STANDALONE: Abrir iframe directo al Home de Wix ═══
+  // El Home.js de Wix ya tiene toda la lógica de apertura con validarYAbrirPuerta.
+  // La PWA solo obtiene GPS y lo pasa como query params para que el Home lo use.
   document.getElementById('mainCard').style.display='none';
-  document.body.style.cssText='margin:0;padding:0;background:#3d4a5c;min-height:100vh;display:flex;align-items:center;justify-content:center';
-  var screen=document.getElementById('doorScreen');
-  screen.classList.add('active');
-  var spinner=document.getElementById('doorSpinner');
-  var statusEl=document.getElementById('doorStatus');
-  var resultEl=document.getElementById('doorResult');
-  var iconEl=document.getElementById('doorIcon');
-  var titleEl=document.getElementById('doorTitle');
-  var msgEl=document.getElementById('doorMsg');
-  var roomInfoEl=document.getElementById('doorRoomInfo');
-  var btnSite=document.getElementById('doorBtnSite');
+  document.body.style.cssText='margin:0;padding:0;overflow:hidden;background:#fff;width:100%;height:100%';
 
-  function showResult(type, titleText, msgText, extra){
-    spinner.style.display='none';
-    statusEl.style.display='none';
-    iconEl.className='door-icon '+type;
-    iconEl.textContent=type==='success'?'✔':type==='error'?'✗':type==='warning'?'!':'◎';
-    titleEl.textContent=titleText;
-    msgEl.innerHTML=msgText;
-    if(extra)roomInfoEl.innerHTML=extra;
-    resultEl.classList.add('show');
-    btnSite.style.display='block';
-    btnSite.href='#';
-    btnSite.onclick=function(e){e.preventDefault();showWixIframe()};
-  }
+  var f=document.getElementById('pwaFrame');
+  f.style.display='block';
 
-  function showWixIframe(){
-    screen.classList.remove('active');
-    document.body.style.cssText='margin:0;padding:0;overflow:hidden;background:#fff;width:100%;height:100%';
-    var f=document.getElementById('pwaFrame');
-    f.style.display='block';
-    var sc=1.3;
-    f.style.width=Math.round(window.innerWidth/sc)+'px';
-    f.style.height=Math.round(window.innerHeight/1.27)+'px';
-    f.src='https://www.minkahostel.com/?t='+encodeURIComponent(token);
-  }
+  // Construir URL del Home con el token
+  var wixHome='https://www.minkahostel.com/?t='+encodeURIComponent(token);
 
-  /**
-   * Llama al endpoint POST /_functions/doorAccess.
-   * Usa Content-Type: text/plain para evitar CORS preflight.
-   * (text/plain es "simple request" — no dispara OPTIONS)
-   */
-  function callApi(extraParams){
-    statusEl.textContent='Abriendo puerta...';
-    var payload={token:token};
-    if(geoData.lat!==null){payload.lat=geoData.lat;payload.lng=geoData.lng;payload.acc=Math.round(geoData.acc||0)}
-    if(extraParams){for(var k in extraParams)payload[k]=extraParams[k]}
-
-    fetch(API_URL,{
-      method:'POST',
-      headers:{'Content-Type':'text/plain'},
-      body:JSON.stringify(payload)
-    })
-    .then(function(r){
-      if(!r.ok)throw new Error('HTTP '+r.status);
-      return r.json();
-    })
-    .then(function(data){handleResponse(data)})
-    .catch(function(e){
-      showResult('error','Error de conexión','No se pudo conectar con el servidor.<br><span style="font-size:9px;color:#999">'+e.message+'</span>','');
-    });
-  }
-
-  function handleResponse(data){
-    if(data.success){
-      var roomHtml='';
-      if(data.firstAccess&&data.roomInfo&&data.roomInfo.length){
-        data.roomInfo.forEach(function(rm){
-          roomHtml+='<div class="room-card">';
-          roomHtml+='<div class="room-cat">'+((rm.categoria||rm.title||'').replace(/-/g,' '))+'</div>';
-          if(rm.ubicacion){
-            var u=rm.ubicacion;
-            if(u.numero)roomHtml+='<div class="room-detail">🛏️ '+(data.lang==='es'?'Habitación N°: ':'Room #: ')+u.numero+(u.piso?' — '+(data.lang==='es'?'Piso ':'Floor ')+u.piso:'')+'</div>';
-            if(u.instrucciones)roomHtml+='<div class="room-detail" style="font-style:italic;margin-top:4px">'+u.instrucciones+'</div>';
-            if(u.claveAcceso)roomHtml+='<div class="room-key">🔑 '+u.claveAcceso+'</div>';
-          }
-          roomHtml+='</div>';
-        });
-      }
-      var titleTxt=data.firstAccess?(data.lang==='es'?'¡Bienvenido, '+data.name+'!':'Welcome, '+data.name+'!'):(data.lang==='es'?'Acceso concedido':'Access granted');
-      var msgTxt=data.firstAccess?(data.lang==='es'?'Aquí está la info de tu habitación.<br><b>Por seguridad:</b> mantén la puerta cerrada.':'Here is your room info.<br><b>For security:</b> keep the door closed.'):(data.lang==='es'?'<b>Por seguridad:</b> mantén la puerta cerrada.':'<b>For security:</b> keep the door closed.');
-      showResult('success',titleTxt,msgTxt,roomHtml);
-      return;
-    }
-
-    // ── Mapear errores a UI ──
-    var errType='error',errTitle=data.message||'Error',errMsg='';
-
-    if(data.error==='GEO_FAR'){
-      errType='info';
-      errTitle=data.lang==='es'?'Fuera de rango':'Out of range';
-      errMsg=(data.lang==='es'?'Acércate a la puerta del hotel e intenta de nuevo.':'Get closer to the hotel door and try again.')+'<br><span style="font-size:10px;color:#999">'+(data.lang==='es'?'Distancia':'Distance')+': '+(data.distance||'?')+'m</span>';
-    }
-    else if(data.error==='CHECKIN_REQUIRED'){
-      errType='warning';
-      errTitle=data.lang==='es'?'Check-in requerido':'Check-in required';
-      errMsg=data.message;
-      btnSite.textContent='📋 Check-in';
-      btnSite.style.display='block';
-      btnSite.onclick=function(e){e.preventDefault();window.location.href='https://www.minkahostel.com/checkin?id='+(data.uuid||'')+'&returnDoor=1&msg=checkin'};
-    }
-    else if(data.error==='BALANCE_WARNING'){
-      errType='warning';
-      errTitle=data.lang==='es'?'Saldo pendiente':'Pending balance';
-      errMsg=data.message;
-      var btnOpen=document.createElement('button');
-      btnOpen.className='door-btn green';
-      btnOpen.textContent=data.lang==='es'?'🔓 Abrir de todos modos':'🔓 Open anyway';
-      btnOpen.onclick=function(){
-        resultEl.classList.remove('show');
-        spinner.style.display='block';
-        statusEl.style.display='block';
-        statusEl.textContent=data.lang==='es'?'Abriendo puerta...':'Opening door...';
-        callApi({confirmBalance:true});
-      };
-      roomInfoEl.innerHTML='';
-      roomInfoEl.appendChild(btnOpen);
-    }
-    else if(data.error==='BALANCE_CHECKOUT'||data.error==='ENDED_BALANCE'||data.error==='DC_ENDED_BALANCE'||data.error==='DC_LAST_HOUR'){
-      errType='warning';
-      errTitle=data.lang==='es'?'Saldo pendiente':'Pending balance';
-      errMsg=data.message;
-    }
-    else if(data.error==='DC_NOT_STARTED'){
-      errType='info';
-      errTitle=data.lang==='es'?'Horario no disponible':'Schedule not available';
-      errMsg=data.message;
-    }
-    else if(data.error==='DC_ENDED'||data.error==='ENDED'){
-      errType='success';
-      errTitle=data.lang==='es'?'Finalizado':'Ended';
-      errMsg=data.message;
-    }
-    else if(data.error==='CANCELLED'){
-      errType='error';
-      errTitle=data.lang==='es'?'Reserva cancelada':'Reservation cancelled';
-      errMsg=data.message;
-    }
-    else if(data.error==='DISABLED'){
-      errType='warning';
-      errMsg=data.message;
-    }
-    else if(data.error==='DOOR_FAIL'){
-      errType='error';
-      errTitle=data.lang==='es'?'No se pudo abrir':'Could not open';
-      errMsg=data.lang==='es'?'Presiona el timbre frente a la cámara y espera autorización.':'Press the doorbell in front of the camera and wait for authorization.';
-    }
-    else if(data.error==='GEO_REQUIRED'){
-      errType='warning';
-      errTitle=data.lang==='es'?'Ubicación requerida':'Location required';
-      errMsg=data.lang==='es'?'Activa la ubicación para este sitio.':'Enable location for this site.';
-    }
-    else{errMsg=data.message||'';}
-
-    if(data.error!=='BALANCE_WARNING')showResult(errType,errTitle,errMsg,'');
-  }
-
-  // ── Obtener GPS fresco ──
-  statusEl.textContent='Obteniendo ubicación...';
-  var geoData={lat:null,lng:null,acc:null};
-
+  // Intentar obtener GPS para pasarlo al Home (el Home lo usa si lo recibe)
   if(navigator.geolocation){
     navigator.geolocation.getCurrentPosition(
       function(pos){
-        geoData.lat=pos.coords.latitude;
-        geoData.lng=pos.coords.longitude;
-        geoData.acc=pos.coords.accuracy;
-        callApi();
+        wixHome+='&glat='+pos.coords.latitude+'&glng='+pos.coords.longitude+'&gacc='+Math.round(pos.coords.accuracy);
+        f.src=wixHome;
       },
       function(){
-        showResult('warning',
-          'Ubicación requerida',
-          'Por seguridad, esta opción requiere permisos de ubicación.<br><br>Activa la ubicación en la configuración de tu navegador para este sitio y vuelve a intentar.<br><br><span style="color:#999;font-size:10px">Location required. Enable location permissions and try again.</span>','');
+        // Si geo falla, abrir igual — el Home pedirá geo por su cuenta
+        f.src=wixHome;
       },
-      {enableHighAccuracy:true,maximumAge:0,timeout:8000}
+      {enableHighAccuracy:true,maximumAge:0,timeout:6000}
     );
   } else {
-    showResult('warning','Ubicación no disponible','Tu dispositivo no soporta geolocalización.','');
+    f.src=wixHome;
   }
 
   // Prevenir back (cierra PWA)
