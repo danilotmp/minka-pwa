@@ -140,7 +140,6 @@ if(isPwa&&token){
     console.log('[PWA] calling API:', apiUrl, 'payload:', payload);
     fetch(apiUrl,{
       method:'POST',
-      headers:{'Content-Type':'application/json'},
       body:payload
     })
     .then(function(r){if(!r.ok){throw new Error('HTTP '+r.status)}return r.json()})
