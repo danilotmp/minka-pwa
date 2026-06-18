@@ -135,13 +135,9 @@ if(isPwa&&token){
 
   function callApi(){
     status.textContent='Abriendo puerta...';
-    var apiUrl='https://www.minkahostel.com/_functions/doorAccess';
-    var payload=JSON.stringify({token:token,lat:geoData.lat,lng:geoData.lng,acc:geoData.acc});
-    console.log('[PWA] calling API:', apiUrl, 'payload:', payload);
-    fetch(apiUrl,{
-      method:'POST',
-      body:payload
-    })
+    var apiUrl='https://www.minkahostel.com/_functions/doorAccess?token='+encodeURIComponent(token);
+    if(geoData.lat)apiUrl+='&lat='+geoData.lat+'&lng='+geoData.lng+'&acc='+Math.round(geoData.acc||0);
+    fetch(apiUrl)
     .then(function(r){if(!r.ok){throw new Error('HTTP '+r.status)}return r.json()})
     .then(function(data){
       if(data.success){
@@ -174,7 +170,8 @@ if(isPwa&&token){
           errType='warning';errTitle=data.lang==='es'?'Saldo pendiente':'Pending balance';errMsg=data.message;
           var btnOpen=document.createElement('button');btnOpen.className='door-btn green';btnOpen.textContent=data.lang==='es'?'🔓 Abrir de todos modos':'🔓 Open anyway';
           btnOpen.onclick=function(){result.classList.remove('show');spinner.style.display='block';status.style.display='block';status.textContent=data.lang==='es'?'Abriendo puerta...':'Opening door...';
-            fetch('https://www.minkahostel.com/_functions/doorAccess',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token:token,lat:geoData.lat,lng:geoData.lng,acc:geoData.acc,confirmBalance:true})}).then(function(r){return r.json()}).then(function(d2){
+            var confirmUrl='https://www.minkahostel.com/_functions/doorAccess?token='+encodeURIComponent(token)+'&lat='+geoData.lat+'&lng='+geoData.lng+'&acc='+Math.round(geoData.acc||0)+'&confirm=1';
+            fetch(confirmUrl).then(function(r){return r.json()}).then(function(d2){
               if(d2.success){showResult('success',d2.lang==='es'?'Acceso concedido':'Access granted',d2.lang==='es'?'<b>Por seguridad:</b> mantén la puerta cerrada.':'<b>For security:</b> keep the door closed.','')}
               else{showResult('error',d2.message||'Error','','')}
             }).catch(function(){showResult('error','Error','','')})};
