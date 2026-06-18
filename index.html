@@ -135,12 +135,15 @@ if(isPwa&&token){
 
   function callApi(){
     status.textContent='Abriendo puerta...';
-    fetch('https://www.minkahostel.com/_functions/doorAccess',{
+    var apiUrl='https://www.minkahostel.com/_functions/doorAccess';
+    var payload=JSON.stringify({token:token,lat:geoData.lat,lng:geoData.lng,acc:geoData.acc});
+    console.log('[PWA] calling API:', apiUrl, 'payload:', payload);
+    fetch(apiUrl,{
       method:'POST',
       headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({token:token,lat:geoData.lat,lng:geoData.lng,acc:geoData.acc})
+      body:payload
     })
-    .then(function(r){return r.json()})
+    .then(function(r){if(!r.ok){throw new Error('HTTP '+r.status)}return r.json()})
     .then(function(data){
       if(data.success){
         var roomHtml='';
@@ -190,7 +193,7 @@ if(isPwa&&token){
       }
     })
     .catch(function(e){
-      showResult('error','Error de conexión','No se pudo conectar con el servidor. Verifica tu conexión a internet.','');
+      showResult('error','Error de conexión','No se pudo conectar con el servidor.<br><span style="font-size:9px;color:#999">'+e.message+'</span>','');
     });
   }
 
