@@ -245,14 +245,14 @@ if(isPwa&&token){
     }
 
     if(err==='BALANCE_WARNING'){
-      // Nombre del huésped + tabla de saldo + botón "Abrir puerta"
+      // Nombre del huésped + imagen + tabla de saldo + botón "Abrir puerta"
       var bal=data.balance||0;
-      var balHtml='<img src="'+IMG_BP+'" style="width:80px;margin:-10px auto 8px;display:block">';
+      var balHtml='<img src="'+IMG_BP+'" style="width:60px;margin:4px auto 8px;display:block">';
       balHtml+='<div style="font-size:11px;color:#555;line-height:1.6;margin-bottom:10px">'+(es?'Tienes un saldo pendiente de <b>$'+bal.toFixed(2)+'</b>. Aún puedes abrir la puerta.':'You have a pending balance of <b>$'+bal.toFixed(2)+'</b>. You can still open the door.')+'</div>';
       balHtml+='<table class="balance-table"><tr><td class="lbl">'+(es?'Concepto':'Item')+'</td><td class="val">'+(es?'Saldo':'Balance')+'</td></tr>';
       balHtml+='<tr><td class="lbl">'+(es?'Hospedaje':'Accommodation')+'</td><td class="val">$'+bal.toFixed(2)+'</td></tr>';
       balHtml+='<tr class="total"><td>Total</td><td class="val">$'+bal.toFixed(2)+'</td></tr></table>';
-      showResult('warning',data.name||(es?'Saldo pendiente':'Pending balance'),'',balHtml);
+      showResult('warning',es?'Saldo pendiente':'Pending balance','',balHtml);
       // Botón verde "Abrir puerta"
       actionsEl.innerHTML='<button class="door-btn green" id="_btnOpenDoor">'+(es?'Abrir puerta':'Open door')+'</button>';
       document.getElementById('_btnOpenDoor').onclick=function(){resetForRetry();statusEl.textContent=es?'Abriendo puerta...':'Opening door...';callApi({confirmBalance:true})};
@@ -260,12 +260,11 @@ if(isPwa&&token){
     }
 
     if(err==='BALANCE_CHECKOUT'||err==='ENDED_BALANCE'||err==='DC_ENDED_BALANCE'||err==='DC_LAST_HOUR'){
-      var bal2=data.balance||0;
-      var payHtml='<img src="'+IMG_BP+'" style="width:80px;margin:-10px auto 8px;display:block">';
+      var payHtml='<img src="'+IMG_BP+'" style="width:60px;margin:4px auto 8px;display:block">';
       payHtml+='<div style="font-size:11px;color:#555;line-height:1.6;margin-bottom:10px">'+data.message+'</div>';
       showResult('warning',es?'Saldo pendiente':'Pending balance','',payHtml);
       // Botón verde "Pagar"
-      actionsEl.innerHTML='<a class="door-btn green" href="https://www.minkahostel.com/?t='+encodeURIComponent(token)+'" target="_blank" style="margin-top:10px">'+(es?'Pagar':'Pay')+'</a>';
+      actionsEl.innerHTML='<a class="door-btn green" href="https://www.minkahostel.com/?t='+encodeURIComponent(token)+'" target="_blank">'+(es?'Pagar':'Pay')+'</a>';
       return;
     }
 
