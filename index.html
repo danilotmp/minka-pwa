@@ -30,21 +30,34 @@ p{font-size:13px;color:#666;line-height:1.5;margin-bottom:20px}
 .door-screen.active{display:flex}
 .door-spinner{width:48px;height:48px;border:4px solid rgba(255,255,255,.2);border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite;margin-bottom:16px}
 .door-status{font-size:13px;color:rgba(255,255,255,.7);margin-bottom:24px}
-.door-result{background:#fff;border-radius:16px;padding:28px 20px;max-width:340px;width:100%;text-align:center;box-shadow:0 12px 40px rgba(0,0,0,.3);display:none}
+.door-result{background:#fff;border-radius:16px;padding:28px 20px;max-width:340px;width:100%;text-align:center;box-shadow:0 12px 40px rgba(0,0,0,.3);display:none;position:relative}
 .door-result.show{display:block}
+.door-close{position:absolute;top:10px;right:14px;background:rgba(0,0,0,.1);border:none;border-radius:50%;width:28px;height:28px;font-size:18px;color:#666;cursor:pointer;line-height:28px;text-align:center}
+.door-close:active{background:rgba(0,0,0,.2)}
 .door-icon{width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-size:28px;color:#fff}
 .door-icon.success{background:#4CAF50}
 .door-icon.error{background:#E53935}
 .door-icon.warning{background:#FF9800}
 .door-icon.info{background:#1565c0}
-.door-title{font-size:16px;font-weight:700;color:#1e3a5f;margin-bottom:8px}
-.door-msg{font-size:12px;color:#555;line-height:1.6;margin-bottom:16px}
-.door-btn{display:block;width:100%;padding:14px;background:#1a56db;color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;margin-top:10px;text-decoration:none;text-align:center}
-.door-btn.green{background:#00A0B4}
+.door-title{font-size:14px;font-weight:700;margin-bottom:8px}
+.door-title.success{color:#2e7d32}
+.door-title.error{color:#c62828}
+.door-title.warning{color:#e65100}
+.door-title.info{color:#1565c0}
+.door-msg{font-size:11px;color:#555;line-height:1.6;margin-bottom:12px}
+.door-btn{display:block;width:100%;padding:14px;color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;margin-top:10px;text-decoration:none;text-align:center}
+.door-btn.green{background:#7cb342;box-shadow:0 3px 8px rgba(124,179,66,.4)}
+.door-btn.green:active{background:#689f38}
+.door-btn.blue{background:#1a56db;box-shadow:0 3px 8px rgba(26,86,219,.3)}
 .room-card{background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;padding:14px;margin-top:12px;text-align:left}
 .room-cat{font-size:14px;font-weight:700;color:#1e3a5f;text-transform:uppercase;margin-bottom:4px}
 .room-detail{font-size:11px;color:#555;line-height:1.6}
 .room-key{font-size:12px;color:#333;margin-top:4px}
+.balance-table{width:100%;border-collapse:collapse;margin-top:10px;font-size:12px}
+.balance-table td{padding:5px 0}
+.balance-table .lbl{color:#555}
+.balance-table .val{text-align:right;font-weight:600;color:#333}
+.balance-table .total td{border-top:2px solid #ddd;padding-top:8px;font-weight:700;color:#20303C;font-size:13px}
 /*
  ═══════════════════════════════════════════════════════════════════
  IFRAME WIX DENTRO DE PWA — PARÁMETROS INAMOVIBLES
@@ -82,11 +95,12 @@ if(isStandalone&&token){
 <div class="door-spinner" id="doorSpinner"></div>
 <div class="door-status" id="doorStatus">Verificando acceso...</div>
 <div class="door-result" id="doorResult">
+  <button class="door-close" id="doorBtnClose">&times;</button>
   <div class="door-icon" id="doorIcon">✔</div>
   <div class="door-title" id="doorTitle"></div>
   <div class="door-msg" id="doorMsg"></div>
   <div id="doorRoomInfo"></div>
-  <button class="door-btn green" id="doorBtnClose" style="display:none">Cerrar</button>
+  <div id="doorActions"></div>
 </div>
 </div>
 <iframe id="pwaFrame" allow="geolocation *; camera *" allowfullscreen></iframe>
@@ -110,33 +124,44 @@ if(isPwa&&token){
   var titleEl=document.getElementById('doorTitle');
   var msgEl=document.getElementById('doorMsg');
   var roomInfoEl=document.getElementById('doorRoomInfo');
+  var actionsEl=document.getElementById('doorActions');
   var btnClose=document.getElementById('doorBtnClose');
 
-  function showResult(type, titleText, msgText, extra){
+  // X cierra: muestra el iframe (ya precargado por debajo)
+  btnClose.onclick=function(){
+    screen.classList.remove('active');
+    document.body.style.cssText='margin:0;padding:0;overflow:hidden;background:#fff;width:100%;height:100%';
+    var f=document.getElementById('pwaFrame');
+    f.style.display='block';
+  };
+
+  // Precargar iframe por debajo mientras se muestra el resultado
+  (function(){
+    var f=document.getElementById('pwaFrame');
+    f.style.width=Math.round(window.innerWidth/1.3)+'px';
+    f.style.height=Math.round(window.innerHeight/1.26)+'px';
+    f.src='https://www.minkahostel.com';
+  })();
+
+  function showResult(type, titleText, msgText, extraHtml){
     spinner.style.display='none';
     statusEl.style.display='none';
     iconEl.className='door-icon '+type;
     iconEl.textContent=type==='success'?'✔':type==='error'?'✗':type==='warning'?'!':'◎';
+    titleEl.className='door-title '+type;
     titleEl.textContent=titleText;
     msgEl.innerHTML=msgText;
-    roomInfoEl.innerHTML='';
-    if(extra)roomInfoEl.innerHTML=extra;
+    roomInfoEl.innerHTML=extraHtml||'';
+    actionsEl.innerHTML='';
     resultEl.classList.add('show');
-    btnClose.style.display='block';
-    // Cerrar: oculta resultado, queda pantalla de fondo. El usuario puede cerrar la PWA.
-    btnClose.onclick=function(){
-      // En PWA standalone no se puede cerrar la ventana programáticamente.
-      // Mostrar la web de Minka en el iframe para que el usuario navegue.
-      resultEl.classList.remove('show');
-      btnClose.style.display='none';
-      screen.classList.remove('active');
-      document.body.style.cssText='margin:0;padding:0;overflow:hidden;background:#fff;width:100%;height:100%';
-      var f=document.getElementById('pwaFrame');
-      f.style.display='block';
-      f.style.width=Math.round(window.innerWidth/1.3)+'px';
-      f.style.height=Math.round(window.innerHeight/1.26)+'px';
-      f.src='https://www.minkahostel.com';
-    };
+  }
+
+  function resetForRetry(){
+    resultEl.classList.remove('show');
+    roomInfoEl.innerHTML='';
+    actionsEl.innerHTML='';
+    spinner.style.display='block';
+    statusEl.style.display='block';
   }
 
   // Fallback: si fetch falla, abrir iframe al Home
@@ -177,6 +202,9 @@ if(isPwa&&token){
   }
 
   function handleResponse(data){
+    var es=data.lang==='es';
+    var IMG_BP='https://static.wixstatic.com/media/16b791_24235df3f3974f1d9712287154c039b0~mv2.png';
+
     if(data.success){
       var roomHtml='';
       if(data.firstAccess&&data.roomInfo&&data.roomInfo.length){
@@ -185,62 +213,71 @@ if(isPwa&&token){
           roomHtml+='<div class="room-cat">'+((rm.categoria||rm.title||'').replace(/-/g,' '))+'</div>';
           if(rm.ubicacion){
             var u=rm.ubicacion;
-            if(u.numero)roomHtml+='<div class="room-detail">🛏️ '+(data.lang==='es'?'Habitación N°: ':'Room #: ')+u.numero+(u.piso?' — '+(data.lang==='es'?'Piso ':'Floor ')+u.piso:'')+'</div>';
+            if(u.numero)roomHtml+='<div class="room-detail">🛏️ '+(es?'Habitación N°: ':'Room #: ')+u.numero+(u.piso?' — '+(es?'Piso ':'Floor ')+u.piso:'')+'</div>';
             if(u.instrucciones)roomHtml+='<div class="room-detail" style="font-style:italic;margin-top:4px">'+u.instrucciones+'</div>';
             if(u.claveAcceso)roomHtml+='<div class="room-key">🔑 '+u.claveAcceso+'</div>';
           }
           roomHtml+='</div>';
         });
       }
-      var t=data.firstAccess?(data.lang==='es'?'¡Bienvenido, '+data.name+'!':'Welcome, '+data.name+'!'):(data.lang==='es'?'Acceso concedido':'Access granted');
-      var m=data.firstAccess?(data.lang==='es'?'Aquí está la info de tu habitación.<br><b>Por seguridad:</b> mantén la puerta cerrada.':'Here is your room info.<br><b>For security:</b> keep the door closed.'):(data.lang==='es'?'<b>Por seguridad:</b> mantén la puerta cerrada.':'<b>For security:</b> keep the door closed.');
-      showResult('success',t,m,roomHtml);
+      var tit=data.firstAccess?(es?'¡Bienvenido, '+data.name+'!':'Welcome, '+data.name+'!'):(es?'Acceso concedido':'Access granted');
+      var msg=data.firstAccess?(es?'Aquí está la info de tu habitación.<br><b>Por seguridad:</b> mantén la puerta cerrada.':'Here is your room info.<br><b>For security:</b> keep the door closed.'):(es?'<b>Por seguridad:</b> mantén la puerta cerrada.':'<b>For security:</b> keep the door closed.');
+      showResult('success',tit,msg,roomHtml);
       return;
     }
-    // Mapear errores
-    var err=data.error,es=data.lang==='es',type='error',title=data.message||'Error',msg='';
+
+    // ── Errores ──
+    var err=data.error;
 
     if(err==='GEO_FAR'){
-      type='info';title=es?'Fuera de rango':'Out of range';
-      msg=(es?'Acércate a la puerta del hotel e intenta de nuevo.':'Get closer to the hotel door and try again.')+'<br><span style="font-size:10px;color:#999">'+(es?'Distancia':'Distance')+': '+(data.distance||'?')+'m</span>';
-    }
-    else if(err==='CHECKIN_REQUIRED'){
-      type='warning';title=es?'Check-in requerido':'Check-in required';msg=data.message;
-      // Botón para ir al checkin
-      var extraHtml='<a class="door-btn" href="https://www.minkahostel.com/checkin?id='+(data.uuid||'')+'&returnDoor=1&msg=checkin" target="_blank">📋 '+(es?'Completar Check-in':'Complete Check-in')+'</a>';
-      showResult(type,title,msg,extraHtml);return;
-    }
-    else if(err==='BALANCE_WARNING'){
-      type='warning';title=es?'Saldo pendiente':'Pending balance';
-      // Resumen de saldo
-      var bal=data.balance||0;
-      msg=(es?'Tienes un saldo pendiente. Aún puedes abrir la puerta.':'You have a pending balance. You can still open the door.');
-      msg+='<div style="background:#fff8e1;border:1px solid #ffe082;border-radius:8px;padding:10px;margin-top:10px;text-align:center"><span style="font-size:18px;font-weight:700;color:#e65100">$'+bal.toFixed(2)+'</span><br><span style="font-size:10px;color:#888">'+(es?'Saldo pendiente':'Pending balance')+'</span></div>';
-      showResult(type,title,msg,'');
-      // Botón abrir de todos modos
-      var btnOpen=document.createElement('button');btnOpen.className='door-btn green';btnOpen.style.marginTop='10px';
-      btnOpen.textContent=es?'🔓 Abrir de todos modos':'🔓 Open anyway';
-      btnOpen.onclick=function(){resultEl.classList.remove('show');spinner.style.display='block';statusEl.style.display='block';statusEl.textContent=es?'Abriendo puerta...':'Opening door...';callApi({confirmBalance:true})};
-      roomInfoEl.appendChild(btnOpen);
+      showResult('info',
+        es?'Fuera de rango':'Out of range',
+        (es?'Acércate a la puerta del hotel e intenta de nuevo.':'Get closer to the hotel door and try again.')+'<br><span style="font-size:10px;color:#999">'+(es?'Distancia':'Distance')+': '+(data.distance||'?')+'m</span>');
       return;
     }
-    else if(err==='BALANCE_CHECKOUT'||err==='ENDED_BALANCE'||err==='DC_ENDED_BALANCE'||err==='DC_LAST_HOUR'){
-      type='warning';title=es?'Saldo pendiente':'Pending balance';
-      var bal2=data.balance||0;
-      msg=data.message;
-      msg+='<div style="background:#fff8e1;border:1px solid #ffe082;border-radius:8px;padding:10px;margin-top:10px;text-align:center"><span style="font-size:18px;font-weight:700;color:#e65100">$'+bal2.toFixed(2)+'</span><br><span style="font-size:10px;color:#888">'+(es?'Saldo pendiente':'Pending balance')+'</span></div>';
-      // Botón de pago (abre la web de Minka para pagar)
-      var extraPay='<a class="door-btn" href="https://www.minkahostel.com/?t='+encodeURIComponent(token)+'" target="_blank" style="margin-top:10px">💳 '+(es?'Pagar ahora':'Pay now')+'</a>';
-      showResult(type,title,msg,extraPay);return;
+
+    if(err==='CHECKIN_REQUIRED'){
+      showResult('warning',
+        es?'Check-in requerido':'Check-in required',
+        data.message,
+        '<a class="door-btn green" href="https://www.minkahostel.com/checkin?id='+(data.uuid||'')+'&returnDoor=1&msg=checkin" target="_blank" style="margin-top:10px">📋 '+(es?'Completar Check-in':'Complete Check-in')+'</a>');
+      return;
     }
-    else if(err==='DC_NOT_STARTED'){type='info';title=es?'Horario no disponible':'Schedule not available';msg=data.message;}
-    else if(err==='DC_ENDED'||err==='ENDED'){type='success';title=es?'Finalizado':'Ended';msg=data.message;}
-    else if(err==='CANCELLED'){type='error';title=es?'Reserva cancelada':'Reservation cancelled';msg=data.message;}
-    else if(err==='DISABLED'){type='warning';title=es?'Acceso deshabilitado':'Access disabled';msg=data.message;}
-    else if(err==='DOOR_FAIL'){type='error';title=es?'No se pudo abrir':'Could not open';msg=es?'Presiona el timbre frente a la cámara y espera autorización.':'Press the doorbell in front of the camera and wait for authorization.';}
-    else if(err==='GEO_REQUIRED'){type='warning';title=es?'Ubicación requerida':'Location required';msg=es?'Activa la ubicación para este sitio.':'Enable location for this site.';}
-    else{msg=data.message||'';}
-    showResult(type,title,msg,'');
+
+    if(err==='BALANCE_WARNING'){
+      // Nombre del huésped + tabla de saldo + botón "Abrir puerta"
+      var bal=data.balance||0;
+      var balHtml='<img src="'+IMG_BP+'" style="width:80px;margin:-10px auto 8px;display:block">';
+      balHtml+='<div style="font-size:11px;color:#555;line-height:1.6;margin-bottom:10px">'+(es?'Tienes un saldo pendiente de <b>$'+bal.toFixed(2)+'</b>. Aún puedes abrir la puerta.':'You have a pending balance of <b>$'+bal.toFixed(2)+'</b>. You can still open the door.')+'</div>';
+      balHtml+='<table class="balance-table"><tr><td class="lbl">'+(es?'Concepto':'Item')+'</td><td class="val">'+(es?'Saldo':'Balance')+'</td></tr>';
+      balHtml+='<tr><td class="lbl">'+(es?'Hospedaje':'Accommodation')+'</td><td class="val">$'+bal.toFixed(2)+'</td></tr>';
+      balHtml+='<tr class="total"><td>Total</td><td class="val">$'+bal.toFixed(2)+'</td></tr></table>';
+      showResult('warning',data.name||(es?'Saldo pendiente':'Pending balance'),'',balHtml);
+      // Botón verde "Abrir puerta"
+      actionsEl.innerHTML='<button class="door-btn green" id="_btnOpenDoor">'+(es?'Abrir puerta':'Open door')+'</button>';
+      document.getElementById('_btnOpenDoor').onclick=function(){resetForRetry();statusEl.textContent=es?'Abriendo puerta...':'Opening door...';callApi({confirmBalance:true})};
+      return;
+    }
+
+    if(err==='BALANCE_CHECKOUT'||err==='ENDED_BALANCE'||err==='DC_ENDED_BALANCE'||err==='DC_LAST_HOUR'){
+      var bal2=data.balance||0;
+      var payHtml='<img src="'+IMG_BP+'" style="width:80px;margin:-10px auto 8px;display:block">';
+      payHtml+='<div style="font-size:11px;color:#555;line-height:1.6;margin-bottom:10px">'+data.message+'</div>';
+      showResult('warning',es?'Saldo pendiente':'Pending balance','',payHtml);
+      // Botón verde "Pagar"
+      actionsEl.innerHTML='<a class="door-btn green" href="https://www.minkahostel.com/?t='+encodeURIComponent(token)+'" target="_blank" style="margin-top:10px">'+(es?'Pagar':'Pay')+'</a>';
+      return;
+    }
+
+    if(err==='DC_NOT_STARTED'){showResult('info',es?'Horario no disponible':'Schedule not available',data.message);return;}
+    if(err==='DC_ENDED'||err==='ENDED'){showResult('success',es?'Finalizado':'Ended',data.message);return;}
+    if(err==='CANCELLED'){showResult('error',es?'Reserva cancelada':'Reservation cancelled',data.message);return;}
+    if(err==='DISABLED'){showResult('warning',es?'Acceso deshabilitado':'Access disabled',data.message);return;}
+    if(err==='DOOR_FAIL'){showResult('error',es?'No se pudo abrir':'Could not open',es?'Presiona el timbre frente a la cámara y espera autorización.':'Press the doorbell in front of the camera and wait for authorization.');return;}
+    if(err==='GEO_REQUIRED'){showResult('warning',es?'Ubicación requerida':'Location required',es?'Activa la ubicación para este sitio.':'Enable location for this site.');return;}
+
+    // Genérico
+    showResult('error',data.message||'Error','');
   }
 
   // ── Obtener GPS ──
