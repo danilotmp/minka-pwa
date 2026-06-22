@@ -49,7 +49,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .door-card{background:#fff;border-radius:16px;padding:28px 20px;max-width:340px;width:100%;text-align:center;box-shadow:0 12px 40px rgba(0,0,0,.3);position:relative}
 .door-card .close{position:absolute;top:10px;right:14px;background:rgba(0,0,0,.1);border:none;border-radius:50%;width:28px;height:28px;font-size:18px;color:#666;cursor:pointer;line-height:28px}
 .door-card .close:active{background:rgba(0,0,0,.2)}
-.door-card .d-icon{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 4px;font-size:22px;color:#fff}
+.door-card .d-icon{width:46px;height:46px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 8px;font-size:24px;color:#fff}
 .door-card .d-icon.success{background:#4CAF50}
 .door-card .d-icon.error{background:#E53935}
 .door-card .d-icon.warning{background:#FF9800}
@@ -98,13 +98,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
   </div>
   <div class="door-card" id="doorCard" style="display:none">
     <button class="close" id="doorClose">&times;</button>
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
-      <img src="https://static.wixstatic.com/media/16b791_24235df3f3974f1d9712287154c039b0~mv2.png" style="width:50px;height:auto;flex-shrink:0;">
-      <div>
-        <div class="d-icon" id="doorIcon">!</div>
-        <div class="d-title" id="doorTitle"></div>
-      </div>
-    </div>
+    <img src="https://static.wixstatic.com/media/16b791_24235df3f3974f1d9712287154c039b0~mv2.png" style="width:50px;height:auto;position:absolute;top:16px;left:16px;">
+    <div class="d-icon" id="doorIcon">!</div>
+    <div class="d-title" id="doorTitle"></div>
     <div class="d-msg" id="doorMsg"></div>
     <div class="d-extra" id="doorExtra"></div>
     <div id="doorActions"></div>
