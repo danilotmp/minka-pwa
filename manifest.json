@@ -4,21 +4,21 @@
   "description": "Minka Backpackers",
   "start_url": ".",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#00A0B4",
+  "background_color": "#3d4a5c",
+  "theme_color": "#3d4a5c",
   "orientation": "portrait",
   "icons": [
     {
       "src": "https://static.wixstatic.com/media/16b791_313a210ae33b4d29914a7cb3556419fe~mv2.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any"
+      "purpose": "maskable"
     },
     {
-      "src": "https://static.wixstatic.com/media/16b791_313a210ae33b4d29914a7cb3556419fe~mv2.png",
+      "src": "https://static.wixstatic.com/media/16b791_bc5ee8f8d8fe4e8d80c935db3aafd599~mv2.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "maskable"
+      "purpose": "any"
     }
   ]
 }
