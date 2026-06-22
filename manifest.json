@@ -1,21 +1,21 @@
 {
-  "name": "Minka Access",
-  "short_name": "Minka Access",
-  "description": "Acceso a puerta Minka Backpackers",
+  "name": "Minka",
+  "short_name": "Minka",
+  "description": "Minka Backpackers",
   "start_url": ".",
   "display": "standalone",
-  "background_color": "#3d4a5c",
-  "theme_color": "#1a56db",
+  "background_color": "#ffffff",
+  "theme_color": "#00A0B4",
   "orientation": "portrait",
   "icons": [
     {
-      "src": "https://static.wixstatic.com/media/16b791_ec8a2b519def43e9aec669bc98e95e52~mv2.png",
+      "src": "https://static.wixstatic.com/media/16b791_313a210ae33b4d29914a7cb3556419fe~mv2.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "https://static.wixstatic.com/media/16b791_ec8a2b519def43e9aec669bc98e95e52~mv2.png",
+      "src": "https://static.wixstatic.com/media/16b791_313a210ae33b4d29914a7cb3556419fe~mv2.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
