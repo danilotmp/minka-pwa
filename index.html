@@ -49,7 +49,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .door-card{background:#fff;border-radius:16px;padding:28px 20px;max-width:340px;width:100%;text-align:center;box-shadow:0 12px 40px rgba(0,0,0,.3);position:relative}
 .door-card .close{position:absolute;top:10px;right:14px;background:rgba(0,0,0,.1);border:none;border-radius:50%;width:28px;height:28px;font-size:18px;color:#666;cursor:pointer;line-height:28px}
 .door-card .close:active{background:rgba(0,0,0,.2)}
-.door-card .d-icon{width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-size:28px;color:#fff}
+.door-card .d-icon{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 4px;font-size:22px;color:#fff}
 .door-card .d-icon.success{background:#4CAF50}
 .door-card .d-icon.error{background:#E53935}
 .door-card .d-icon.warning{background:#FF9800}
@@ -98,8 +98,13 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
   </div>
   <div class="door-card" id="doorCard" style="display:none">
     <button class="close" id="doorClose">&times;</button>
-    <div class="d-icon" id="doorIcon">!</div>
-    <div class="d-title" id="doorTitle"></div>
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+      <img src="https://static.wixstatic.com/media/16b791_24235df3f3974f1d9712287154c039b0~mv2.png" style="width:50px;height:auto;flex-shrink:0;">
+      <div>
+        <div class="d-icon" id="doorIcon">!</div>
+        <div class="d-title" id="doorTitle"></div>
+      </div>
+    </div>
     <div class="d-msg" id="doorMsg"></div>
     <div class="d-extra" id="doorExtra"></div>
     <div id="doorActions"></div>
@@ -205,6 +210,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
     loading.style.display='none';
     card.style.display='block';
     iconEl.className='d-icon '+type;
+    iconEl.style.display='flex';
     iconEl.textContent=type==='success'?'✔':type==='error'?'✗':type==='warning'?'!':'◎';
     titleEl.className='d-title '+type;
     titleEl.textContent=title;
@@ -246,8 +252,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
     var err=data.error;
     if(err==='NO_ACTIVE_RESERVATION'){showCard('info',es?'Sin reserva activa':'No active reservation',es?'No se encontró una reserva activa para hoy.':'No active reservation found for today.');return;}
     if(err==='GEO_FAR'){
-      var farHtml='<div style="display:flex;align-items:flex-start;gap:10px;text-align:left;"><img src="https://static.wixstatic.com/media/16b791_24235df3f3974f1d9712287154c039b0~mv2.png" style="width:50px;flex-shrink:0;"><div><span style="font-size:11px;color:#555;line-height:1.5;">'+(es?'Esta función se activa cuando estés frente a la puerta del hotel. Acércate un poco más e inténtalo de nuevo.':'This feature activates when you are in front of the hotel door. Get a little closer and try again.')+'</span><br><span style="font-size:10px;color:#999;margin-top:4px;display:block;">'+(es?'Distancia':'Distance')+': '+(data.distance||'?')+'m</span></div></div>';
-      showCard('info',es?'Fuera de rango':'Out of range','',farHtml);return;
+      var farMsg=es?'Esta función se activa cuando estés frente a la puerta del hotel. Acércate un poco más e inténtalo de nuevo.':'This feature activates when you are in front of the hotel door. Get a little closer and try again.';
+      farMsg+='<br><span style="font-size:10px;color:#999;">'+(es?'Distancia':'Distance')+': '+(data.distance||'?')+'m</span>';
+      showCard('info',es?'Fuera de rango':'Out of range',farMsg);return;
     }
     if(err==='CHECKIN_REQUIRED'){showCard('warning',es?'Check-in requerido':'Check-in required',data.message,'','<a class="d-btn" href="https://www.minkahostel.com/checkin?id='+(data.uuid||'')+'&returnDoor=1&msg=checkin" target="_blank">📋 '+(es?'Completar Check-in':'Complete Check-in')+'</a>');return;}
     if(err==='BALANCE_WARNING'){
@@ -273,8 +280,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
     if(err==='DISABLED'){showCard('warning',es?'Acceso deshabilitado':'Access disabled',data.message);return;}
     if(err==='DOOR_FAIL'){showCard('error',es?'No se pudo abrir':'Could not open',es?'Presiona el timbre frente a la cámara y espera autorización.':'Press the doorbell in front of the camera and wait for authorization.');return;}
     if(err==='GEO_REQUIRED'){
-      var geoHtml='<div style="display:flex;align-items:flex-start;gap:10px;text-align:left;"><img src="https://static.wixstatic.com/media/16b791_24235df3f3974f1d9712287154c039b0~mv2.png" style="width:50px;flex-shrink:0;"><div><span style="font-size:11px;color:#555;line-height:1.5;">'+(es?'Para abrir la puerta necesitamos verificar que estés cerca del hotel. Activa la ubicación en <b>Configuración > Permisos > Ubicación</b> para este sitio y vuelve a intentar.':'To open the door we need to verify you are near the hotel. Enable location in <b>Settings > Permissions > Location</b> for this site and try again.')+'</span></div></div>';
-      showCard('warning',es?'Ubicación requerida':'Location required','',geoHtml);return;
+      var geoMsg=es?'Para abrir la puerta necesitamos verificar que estés cerca del hotel. Activa la ubicación en <b>Configuración > Permisos > Ubicación</b> para este sitio y vuelve a intentar.':'To open the door we need to verify you are near the hotel. Enable location in <b>Settings > Permissions > Location</b> for this site and try again.';
+      showCard('warning',es?'Ubicación requerida':'Location required',geoMsg);return;
     }
     showCard('error',data.message||'Error','');
   }
