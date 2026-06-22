@@ -155,25 +155,22 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
   splash.style.cssText='position:fixed;inset:0;background:#3d4a5c;z-index:250000;display:flex;align-items:center;justify-content:center;transition:opacity 0.6s;';
   splash.innerHTML='<table style="border-collapse:collapse;"><tr><td style="vertical-align:middle;padding-right:14px;"><img src="https://static.wixstatic.com/media/16b791_24235df3f3974f1d9712287154c039b0~mv2.png" style="width:70px;height:auto;"></td><td style="vertical-align:middle;text-align:left;"><div style="font-size:20px;font-weight:700;color:#fff;margin:0 0 2px;">Minka Backpackers</div><div style="font-size:11px;color:rgba(255,255,255,.5);">www.minkahostel.com</div></td></tr></table>';
   document.body.appendChild(splash);
-  // Desvanecer cuando el iframe cargue o máximo 3s
-  var splashRemoved=false;
-  function removeSplash(){if(splashRemoved)return;splashRemoved=true;splash.style.opacity='0';setTimeout(function(){splash.remove()},600)}
-  f.addEventListener('load',function(){setTimeout(removeSplash,300)});
-  setTimeout(removeSplash,3000);
 
-  // ── Guía de primera vez (onboarding) — solo una vez ──
-  if(token && !localStorage.getItem('minka_onboarding_done')){
-    var _origRemoveSplash=removeSplash;
-    removeSplash=function(){
-      if(splashRemoved)return;splashRemoved=true;splash.style.opacity='0';
-      setTimeout(function(){
-        splash.remove();
+  var splashRemoved=false;
+  var showOnboarding=token && !localStorage.getItem('minka_onboarding_done');
+
+  function removeSplash(){
+    if(splashRemoved)return;splashRemoved=true;
+    splash.style.opacity='0';
+    setTimeout(function(){
+      splash.remove();
+      if(showOnboarding){
         // Mostrar tooltip del botón
         var ov=document.createElement('div');
         ov.id='onboardingOv';
         ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:199999;display:flex;align-items:flex-end;justify-content:flex-end;padding:20px;';
         var tip=document.createElement('div');
-        tip.style.cssText='position:fixed;bottom:150px;right:20px;background:#fff;border-radius:10px;padding:12px 16px;max-width:200px;box-shadow:0 4px 16px rgba(0,0,0,.3);font-size:12px;color:#333;line-height:1.5;z-index:200000;';
+        tip.style.cssText='position:fixed;bottom:150px;right:20px;background:#fff;border-radius:10px;padding:14px 18px;max-width:260px;box-shadow:0 4px 16px rgba(0,0,0,.3);font-size:12px;color:#333;line-height:1.5;z-index:200000;';
         tip.innerHTML='<b>🔓 Puerta de acceso</b><br><span style="font-size:11px;color:#555">Presiona este botón para abrir la puerta del hotel.</span><br><span style="font-size:9px;color:#999;font-style:italic;display:block;margin-top:6px">Por tu seguridad, no permitas el ingreso de extraños y mantén la puerta siempre cerrada.</span><br><button id="onboardingOk" style="margin-top:8px;background:#00A0B4;color:#fff;border:none;border-radius:6px;padding:6px 16px;font-size:11px;font-weight:600;cursor:pointer">Entendido</button>';
         var highlight=document.createElement('div');
         highlight.style.cssText='position:fixed;bottom:100px;right:27px;width:44px;height:44px;border-radius:50%;border:3px solid #fff;z-index:200000;box-shadow:0 0 0 4000px rgba(0,0,0,.3);';
@@ -182,9 +179,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
         document.body.appendChild(ov);
         document.getElementById('onboardingOk').addEventListener('click',function(){ov.remove();localStorage.setItem('minka_onboarding_done','1')});
         ov.addEventListener('click',function(e){if(e.target===ov){ov.remove();localStorage.setItem('minka_onboarding_done','1')}});
-      },600);
-    };
+        showOnboarding=false;
+      }
+    },600);
   }
+  f.addEventListener('load',function(){setTimeout(removeSplash,300)});
+  setTimeout(removeSplash,3000);
 
   // ── Overlay elements ──
   var overlay=document.getElementById('doorOverlay');
