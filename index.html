@@ -3,321 +3,246 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<meta name="theme-color" content="#3d4a5c">
+<meta name="theme-color" content="#00A0B4">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="manifest" href="manifest.json">
-<link rel="icon" href="https://static.wixstatic.com/media/16b791_bc5ee8f8d8fe4e8d80c935db3aafd599~mv2.png">
+<link rel="icon" href="https://static.wixstatic.com/media/16b791_313a210ae33b4d29914a7cb3556419fe~mv2.png">
 <link rel="apple-touch-icon" href="https://static.wixstatic.com/media/16b791_313a210ae33b4d29914a7cb3556419fe~mv2.png">
-<title>Minka Door</title>
+<title>Minka</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#3d4a5c;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
-.card{background:#fff;border-radius:20px;padding:40px 24px;max-width:340px;width:100%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.2)}
-.logo{width:80px;height:80px;margin:0 auto 16px}
-.logo img{width:100%;height:100%;object-fit:contain}
-h1{font-size:18px;color:#1e3a5f;margin-bottom:8px}
-p{font-size:13px;color:#666;line-height:1.5;margin-bottom:20px}
-.btn-door{display:block;width:100%;padding:16px;background:#00A0B4;color:#fff;border:none;border-radius:12px;font-size:16px;font-weight:700;cursor:pointer;text-decoration:none;box-shadow:0 4px 12px rgba(0,160,180,.4);transition:transform .1s}
-.btn-door:active{transform:scale(0.97)}
-.btn-install{display:none;width:100%;padding:12px;margin-top:12px;background:#1a56db;color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;box-shadow:0 3px 8px rgba(26,86,219,.3)}
-.btn-install:active{transform:scale(0.97)}
-.guide{display:none;margin-top:16px;padding:12px;background:#f0f7ff;border-radius:10px;font-size:11px;color:#555;line-height:1.6;text-align:left}
-.ok-msg{display:none;margin-top:12px;padding:10px;background:#ecfdf5;border-radius:8px;font-size:12px;color:#059669;font-weight:600}
-@keyframes spin{to{transform:rotate(360deg)}}
-/* Modo apertura directa (standalone) */
-.door-screen{display:none;width:100%;min-height:100vh;flex-direction:column;align-items:center;justify-content:center;padding:30px 20px;text-align:center}
-.door-screen.active{display:flex}
-.door-spinner{width:48px;height:48px;border:4px solid rgba(255,255,255,.2);border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite;margin-bottom:16px}
-.door-status{font-size:13px;color:rgba(255,255,255,.7);margin-bottom:24px}
-.door-result{background:#fff;border-radius:16px;padding:28px 20px;max-width:340px;width:100%;text-align:center;box-shadow:0 12px 40px rgba(0,0,0,.3);display:none;position:relative}
-.door-result.show{display:block}
-.door-close{position:absolute;top:10px;right:14px;background:rgba(0,0,0,.1);border:none;border-radius:50%;width:28px;height:28px;font-size:18px;color:#666;cursor:pointer;line-height:28px;text-align:center}
-.door-close:active{background:rgba(0,0,0,.2)}
-.door-icon{width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-size:28px;color:#fff}
-.door-icon.success{background:#4CAF50}
-.door-icon.error{background:#E53935}
-.door-icon.warning{background:#FF9800}
-.door-icon.info{background:#1565c0}
-.door-title{font-size:14px;font-weight:700;margin-bottom:8px}
-.door-title.success{color:#2e7d32}
-.door-title.error{color:#c62828}
-.door-title.warning{color:#e65100}
-.door-title.info{color:#1565c0}
-.door-msg{font-size:11px;color:#555;line-height:1.6;margin-bottom:12px}
-.door-btn{display:block;width:100%;padding:14px;color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;margin-top:10px;text-decoration:none;text-align:center}
-.door-btn.green{background:#7cb342;box-shadow:0 3px 8px rgba(124,179,66,.4)}
-.door-btn.green:active{background:#689f38}
-.door-btn.blue{background:#1a56db;box-shadow:0 3px 8px rgba(26,86,219,.3)}
-.room-card{background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;padding:14px;margin-top:12px;text-align:left}
-.room-cat{font-size:14px;font-weight:700;color:#1e3a5f;text-transform:uppercase;margin-bottom:4px}
-.room-detail{font-size:11px;color:#555;line-height:1.6}
-.room-key{font-size:12px;color:#333;margin-top:4px}
-.balance-table{width:100%;border-collapse:collapse;margin-top:10px;font-size:12px}
-.balance-table td{padding:5px 0}
-.balance-table .lbl{color:#555}
-.balance-table .val{text-align:right;font-weight:600;color:#333}
-.balance-table .total td{border-top:2px solid #ddd;padding-top:8px;font-weight:700;color:#20303C;font-size:13px}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#fff;overflow:hidden;width:100%;height:100vh}
+/* Card de instalación (modo navegador) */
+.install-card{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:#3d4a5c;z-index:200000;align-items:center;justify-content:center;padding:20px;flex-direction:column}
+.install-card.active{display:flex}
+.install-card .inner{background:#fff;border-radius:20px;padding:40px 24px;max-width:340px;width:100%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.2)}
+.install-card .logo{width:80px;height:80px;margin:0 auto 16px}
+.install-card .logo img{width:100%;height:100%;object-fit:contain}
+.install-card h1{font-size:18px;color:#1e3a5f;margin-bottom:8px}
+.install-card p{font-size:13px;color:#666;line-height:1.5;margin-bottom:20px}
+.install-card .btn{display:block;width:100%;padding:16px;background:#00A0B4;color:#fff;border:none;border-radius:12px;font-size:16px;font-weight:700;cursor:pointer;text-decoration:none;box-shadow:0 4px 12px rgba(0,160,180,.4)}
+.install-card .btn:active{transform:scale(0.97)}
+.install-card .btn-install{display:none;width:100%;padding:12px;margin-top:12px;background:#1a56db;color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer}
+.install-card .guide{display:none;margin-top:16px;padding:12px;background:#f0f7ff;border-radius:10px;font-size:11px;color:#555;line-height:1.6;text-align:left}
 /*
  ═══════════════════════════════════════════════════════════════════
  IFRAME WIX DENTRO DE PWA — PARÁMETROS INAMOVIBLES
- - position:fixed + left:50% + translateX(-50%) scale(1.3)
- - transform-origin:center top
- - JS: width = innerWidth/1.3, height = innerHeight/1.26
  NO MODIFICAR sin probar en dispositivo real.
  ═══════════════════════════════════════════════════════════════════
 */
-#pwaFrame{display:none;position:fixed;top:0;left:50%;border:0;z-index:99999;transform:translateX(-50%) scale(1.3);transform-origin:center top;-webkit-overflow-scrolling:touch}
+#appFrame{position:fixed;top:0;left:50%;border:0;z-index:1;transform:translateX(-50%) scale(1.3);transform-origin:center top;-webkit-overflow-scrolling:touch}
+/* Botón flotante candado */
+#btnDoor{display:none;position:fixed;bottom:90px;right:16px;z-index:99999;width:48px;height:48px;border-radius:50%;background:#00A0B4;border:none;box-shadow:0 4px 12px rgba(0,160,180,.5);cursor:pointer;align-items:center;justify-content:center}
+#btnDoor svg{width:24px;height:24px;fill:#fff}
+#btnDoor:active{transform:scale(0.92)}
+/* Overlay de resultado */
+@keyframes spin{to{transform:rotate(360deg)}}
+#doorOverlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(61,74,92,.92);z-index:100000;align-items:center;justify-content:center;padding:20px}
+#doorOverlay.active{display:flex}
+.door-card{background:#fff;border-radius:16px;padding:28px 20px;max-width:340px;width:100%;text-align:center;box-shadow:0 12px 40px rgba(0,0,0,.3);position:relative}
+.door-card .close{position:absolute;top:10px;right:14px;background:rgba(0,0,0,.1);border:none;border-radius:50%;width:28px;height:28px;font-size:18px;color:#666;cursor:pointer;line-height:28px}
+.door-card .close:active{background:rgba(0,0,0,.2)}
+.door-card .d-icon{width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-size:28px;color:#fff}
+.door-card .d-icon.success{background:#4CAF50}
+.door-card .d-icon.error{background:#E53935}
+.door-card .d-icon.warning{background:#FF9800}
+.door-card .d-icon.info{background:#1565c0}
+.door-card .d-title{font-size:14px;font-weight:700;margin-bottom:8px}
+.door-card .d-title.warning{color:#e65100}
+.door-card .d-title.success{color:#2e7d32}
+.door-card .d-title.error{color:#c62828}
+.door-card .d-title.info{color:#1565c0}
+.door-card .d-msg{font-size:11px;color:#555;line-height:1.6;margin-bottom:12px}
+.door-card .d-btn{display:block;width:100%;padding:14px;color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;margin-top:10px;text-decoration:none;text-align:center;background:#7cb342;box-shadow:0 3px 8px rgba(124,179,66,.4)}
+.door-card .d-btn:active{background:#689f38}
+.door-card .d-extra{margin-top:12px}
+.balance-table{width:100%;border-collapse:collapse;margin-top:10px;font-size:12px}
+.balance-table td{padding:5px 0}
+.balance-table .total td{border-top:2px solid #ddd;padding-top:8px;font-weight:700;font-size:13px}
+.door-spinner{width:48px;height:48px;border:4px solid rgba(255,255,255,.2);border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 16px}
+.door-loading{color:rgba(255,255,255,.7);font-size:13px;text-align:center}
+.room-card{background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;padding:12px;margin-top:10px;text-align:left}
+.room-card .rc-cat{font-size:13px;font-weight:700;color:#1e3a5f;text-transform:uppercase;margin-bottom:4px}
+.room-card .rc-detail{font-size:11px;color:#555;line-height:1.6}
+.room-card .rc-key{font-size:12px;color:#333;margin-top:4px}
 </style>
-<script>
-(function(){
-var isStandalone=window.matchMedia('(display-mode: standalone)').matches||(window.navigator&&window.navigator.standalone);
-var token=new URLSearchParams(window.location.search).get('t')||localStorage.getItem('minka_door_token')||'';
-if(isStandalone&&token){
-  document.documentElement.style.overflow='hidden';
-  document.documentElement.setAttribute('data-pwa','1');
-  document.documentElement.setAttribute('data-token',token);
-}
-})();
-</script>
 </head>
 <body>
-<div class="card" id="mainCard">
-<div class="logo"><img src="https://static.wixstatic.com/media/16b791_bc5ee8f8d8fe4e8d80c935db3aafd599~mv2.png" alt="Minka"></div>
-<h1>Minka Backpackers</h1>
-<p>Tu acceso a la puerta del hotel, disponible 24/7.<br><span style="font-size:11px;color:#999">Your hotel door access, available 24/7.</span></p>
-<a class="btn-door" id="btnDoor" href="#">🔓 Abrir Puerta<br><span style="font-size:11px;font-weight:400;opacity:.7">Open Door</span></a>
-<button class="btn-install" id="btnInstall">📲 Instalar en pantalla<br><span style="font-size:10px;font-weight:400;opacity:.7">Install on home screen</span></button>
-<div class="guide" id="guideIos"><strong>Para instalar en iPhone/iPad:</strong><br>1. Toca el icono compartir ↑<br>2. "Agregar a pantalla de inicio"<br>3. "Agregar"<br><br><span style="color:#999;font-size:10px"><strong>iPhone/iPad:</strong> Tap share ↑ → Add to Home Screen → Add</span></div>
-<div class="ok-msg" id="okMsg">✓ Instalado.<br><span style="font-size:10px;opacity:.8">Installed. Open from home screen.</span></div>
-</div>
-<div class="door-screen" id="doorScreen">
-<div class="door-spinner" id="doorSpinner"></div>
-<div class="door-status" id="doorStatus">Verificando acceso...</div>
-<div class="door-result" id="doorResult">
-  <button class="door-close" id="doorBtnClose">&times;</button>
-  <div class="door-icon" id="doorIcon">✔</div>
-  <div class="door-title" id="doorTitle"></div>
-  <div class="door-msg" id="doorMsg"></div>
-  <div id="doorRoomInfo"></div>
-  <div id="doorActions"></div>
+<!-- Card de instalación (solo modo navegador, no standalone) -->
+<div class="install-card" id="installCard">
+<div class="inner">
+  <div class="logo"><img src="https://static.wixstatic.com/media/16b791_313a210ae33b4d29914a7cb3556419fe~mv2.png" alt="Minka"></div>
+  <h1>Minka Backpackers</h1>
+  <p>Accede a nuestros servicios y tu habitación desde tu celular.<br><span style="font-size:11px;color:#999">Access our services and your room from your phone.</span></p>
+  <a class="btn" id="btnOpen" href="#">Abrir Minka<br><span style="font-size:11px;font-weight:400;opacity:.7">Open Minka</span></a>
+  <button class="btn-install" id="btnInstall">📲 Instalar en pantalla<br><span style="font-size:10px;font-weight:400;opacity:.7">Install on home screen</span></button>
+  <div class="guide" id="guideIos"><strong>Para instalar en iPhone/iPad:</strong><br>1. Toca el icono compartir ↑<br>2. "Agregar a pantalla de inicio"<br>3. "Agregar"<br><br><span style="color:#999;font-size:10px"><strong>iPhone/iPad:</strong> Tap share ↑ → Add to Home Screen → Add</span></div>
 </div>
 </div>
-<iframe id="pwaFrame" allow="geolocation *; camera *" allowfullscreen></iframe>
+<!-- Iframe Wix (standalone) -->
+<iframe id="appFrame" allow="geolocation *; camera *" allowfullscreen></iframe>
+<!-- Botón flotante candado -->
+<button id="btnDoor" aria-label="Abrir puerta"><svg viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zM12 17c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zM9 8V6c0-1.66 1.34-3 3-3s3 1.34 3 3v2H9z"/></svg></button>
+<!-- Overlay apertura puerta -->
+<div id="doorOverlay">
+  <div id="doorLoading">
+    <div class="door-spinner"></div>
+    <div class="door-loading" id="doorStatus">Obteniendo ubicación...</div>
+  </div>
+  <div class="door-card" id="doorCard" style="display:none">
+    <button class="close" id="doorClose">&times;</button>
+    <div class="d-icon" id="doorIcon">!</div>
+    <div class="d-title" id="doorTitle"></div>
+    <div class="d-msg" id="doorMsg"></div>
+    <div class="d-extra" id="doorExtra"></div>
+    <div id="doorActions"></div>
+  </div>
+</div>
 <script>
 (function(){
-var isPwa=document.documentElement.getAttribute('data-pwa')==='1';
-var token=document.documentElement.getAttribute('data-token')||'';
-var API_URL='https://www.minkahostel.com/_functions/doorAccess';
+  var API_URL='https://www.minkahostel.com/_functions/doorAccess';
+  var IMG_BP='https://static.wixstatic.com/media/16b791_24235df3f3974f1d9712287154c039b0~mv2.png';
+  var isStandalone=window.matchMedia('(display-mode: standalone)').matches||(window.navigator&&window.navigator.standalone);
 
-if(isPwa&&token){
-  // ═══ MODO STANDALONE: Widget de apertura ═══
-  // 1. Obtener GPS → 2. Enviar a Wix → 3. Presentar resultado → 4. Cerrar
-  document.getElementById('mainCard').style.display='none';
-  document.body.style.cssText='margin:0;padding:0;background:#3d4a5c;min-height:100vh;display:flex;align-items:center;justify-content:center';
-  var screen=document.getElementById('doorScreen');
-  screen.classList.add('active');
-  var spinner=document.getElementById('doorSpinner');
+  // Token: leer de URL o localStorage
+  var params=new URLSearchParams(window.location.search);
+  var token=params.get('t')||localStorage.getItem('minka_token')||'';
+  if(params.get('t'))localStorage.setItem('minka_token',token);
+
+  // ═══ MODO NAVEGADOR (no instalado) ═══
+  if(!isStandalone){
+    document.getElementById('installCard').classList.add('active');
+    var wixUrl='https://www.minkahostel.com'+(token?'/?t='+encodeURIComponent(token):'');
+    document.getElementById('btnOpen').href=wixUrl;
+    // Instalador
+    var dp=null;
+    window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();dp=e;document.getElementById('btnInstall').style.display='block'});
+    document.getElementById('btnInstall').addEventListener('click',function(){if(dp){dp.prompt();dp.userChoice.then(function(r){if(r.outcome==='accepted')document.getElementById('btnInstall').style.display='none';dp=null})}});
+    var isIos=/iPad|iPhone|iPod/.test(navigator.userAgent)&&!window.MSStream;
+    if(isIos){document.getElementById('btnInstall').style.display='block';document.getElementById('btnInstall').onclick=function(){document.getElementById('guideIos').style.display='block'}}
+    if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(function(){});
+    return;
+  }
+
+  // ═══ MODO STANDALONE (PWA instalada) ═══
+
+  // Iframe Wix fullscreen — PARÁMETROS INAMOVIBLES
+  var f=document.getElementById('appFrame');
+  f.style.width=Math.round(window.innerWidth/1.3)+'px';
+  f.style.height=Math.round(window.innerHeight/1.26)+'px';
+  f.src='https://www.minkahostel.com';
+
+  // Botón candado: solo si hay token
+  var btnDoor=document.getElementById('btnDoor');
+  if(token){btnDoor.style.display='flex'}
+
+  // ── Overlay elements ──
+  var overlay=document.getElementById('doorOverlay');
+  var loading=document.getElementById('doorLoading');
   var statusEl=document.getElementById('doorStatus');
-  var resultEl=document.getElementById('doorResult');
+  var card=document.getElementById('doorCard');
   var iconEl=document.getElementById('doorIcon');
   var titleEl=document.getElementById('doorTitle');
   var msgEl=document.getElementById('doorMsg');
-  var roomInfoEl=document.getElementById('doorRoomInfo');
+  var extraEl=document.getElementById('doorExtra');
   var actionsEl=document.getElementById('doorActions');
-  var btnClose=document.getElementById('doorBtnClose');
+  var closeBtn=document.getElementById('doorClose');
 
-  // X cierra: muestra el iframe (ya precargado por debajo)
-  btnClose.onclick=function(){
-    screen.classList.remove('active');
-    document.body.style.cssText='margin:0;padding:0;overflow:hidden;background:#fff;width:100%;height:100%';
-    var f=document.getElementById('pwaFrame');
-    f.style.display='block';
-  };
+  closeBtn.onclick=function(){overlay.classList.remove('active');card.style.display='none';loading.style.display='block'};
 
-  // Precargar iframe por debajo mientras se muestra el resultado
-  (function(){
-    var f=document.getElementById('pwaFrame');
-    f.style.width=Math.round(window.innerWidth/1.3)+'px';
-    f.style.height=Math.round(window.innerHeight/1.26)+'px';
-    f.src='https://www.minkahostel.com';
-  })();
-
-  function showResult(type, titleText, msgText, extraHtml){
-    spinner.style.display='none';
-    statusEl.style.display='none';
-    iconEl.className='door-icon '+type;
+  function showOverlay(){overlay.classList.add('active');loading.style.display='block';card.style.display='none'}
+  function showCard(type,title,msg,extra,actions){
+    loading.style.display='none';
+    card.style.display='block';
+    iconEl.className='d-icon '+type;
     iconEl.textContent=type==='success'?'✔':type==='error'?'✗':type==='warning'?'!':'◎';
-    titleEl.className='door-title '+type;
-    titleEl.textContent=titleText;
-    msgEl.innerHTML=msgText;
-    roomInfoEl.innerHTML=extraHtml||'';
-    actionsEl.innerHTML='';
-    resultEl.classList.add('show');
+    titleEl.className='d-title '+type;
+    titleEl.textContent=title;
+    msgEl.innerHTML=msg;
+    extraEl.innerHTML=extra||'';
+    actionsEl.innerHTML=actions||'';
   }
 
-  function resetForRetry(){
-    resultEl.classList.remove('show');
-    roomInfoEl.innerHTML='';
-    actionsEl.innerHTML='';
-    spinner.style.display='block';
-    statusEl.style.display='block';
-  }
-
-  // Fallback: si fetch falla, abrir iframe al Home
-  function fallbackIframe(){
-    screen.classList.remove('active');
-    document.body.style.cssText='margin:0;padding:0;overflow:hidden;background:#fff;width:100%;height:100%';
-    var f=document.getElementById('pwaFrame');
-    f.style.display='block';
-    f.style.width=Math.round(window.innerWidth/1.3)+'px';
-    f.style.height=Math.round(window.innerHeight/1.26)+'px';
-    var url='https://www.minkahostel.com/?t='+encodeURIComponent(token);
-    if(geoData.lat)url+='&glat='+geoData.lat+'&glng='+geoData.lng+'&gacc='+Math.round(geoData.acc||0);
-    f.src=url;
-  }
+  var geoData={lat:null,lng:null,acc:null};
 
   function callApi(extraParams){
     statusEl.textContent='Abriendo puerta...';
     var payload={token:token};
     if(geoData.lat!==null){payload.lat=geoData.lat;payload.lng=geoData.lng;payload.acc=Math.round(geoData.acc||0)}
     if(extraParams){for(var k in extraParams)payload[k]=extraParams[k]}
-
     var controller=new AbortController();
-    var timeoutId=setTimeout(function(){controller.abort()},12000);
-
-    fetch(API_URL,{
-      method:'POST',
-      headers:{'Content-Type':'text/plain'},
-      body:JSON.stringify(payload),
-      signal:controller.signal
-    })
-    .then(function(r){clearTimeout(timeoutId);if(!r.ok)throw new Error('HTTP '+r.status);return r.json()})
+    var tid=setTimeout(function(){controller.abort()},12000);
+    fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify(payload),signal:controller.signal})
+    .then(function(r){clearTimeout(tid);if(!r.ok)throw new Error('HTTP '+r.status);return r.json()})
     .then(function(data){handleResponse(data)})
-    .catch(function(e){
-      clearTimeout(timeoutId);
-      // Si fetch falla (CORS, timeout, red) → fallback al iframe
-      fallbackIframe();
-    });
+    .catch(function(e){clearTimeout(tid);showCard('error','Error de conexión','No se pudo conectar.<br><span style="font-size:9px;color:#999">'+(e.name==='AbortError'?'Tiempo agotado':e.message)+'</span>')});
   }
 
   function handleResponse(data){
     var es=data.lang==='es';
-    var IMG_BP='https://static.wixstatic.com/media/16b791_24235df3f3974f1d9712287154c039b0~mv2.png';
-
     if(data.success){
       var roomHtml='';
       if(data.firstAccess&&data.roomInfo&&data.roomInfo.length){
         data.roomInfo.forEach(function(rm){
-          roomHtml+='<div class="room-card">';
-          roomHtml+='<div class="room-cat">'+((rm.categoria||rm.title||'').replace(/-/g,' '))+'</div>';
-          if(rm.ubicacion){
-            var u=rm.ubicacion;
-            if(u.numero)roomHtml+='<div class="room-detail">🛏️ '+(es?'Habitación N°: ':'Room #: ')+u.numero+(u.piso?' — '+(es?'Piso ':'Floor ')+u.piso:'')+'</div>';
-            if(u.instrucciones)roomHtml+='<div class="room-detail" style="font-style:italic;margin-top:4px">'+u.instrucciones+'</div>';
-            if(u.claveAcceso)roomHtml+='<div class="room-key">🔑 '+u.claveAcceso+'</div>';
-          }
+          roomHtml+='<div class="room-card"><div class="rc-cat">'+((rm.categoria||rm.title||'').replace(/-/g,' '))+'</div>';
+          if(rm.ubicacion){var u=rm.ubicacion;if(u.numero)roomHtml+='<div class="rc-detail">🛏️ '+(es?'Habitación N°: ':'Room #: ')+u.numero+(u.piso?' — '+(es?'Piso ':'Floor ')+u.piso:'')+'</div>';if(u.instrucciones)roomHtml+='<div class="rc-detail" style="font-style:italic;margin-top:4px">'+u.instrucciones+'</div>';if(u.claveAcceso)roomHtml+='<div class="rc-key">🔑 '+u.claveAcceso+'</div>'}
           roomHtml+='</div>';
         });
       }
       var tit=data.firstAccess?(es?'¡Bienvenido, '+data.name+'!':'Welcome, '+data.name+'!'):(es?'Acceso concedido':'Access granted');
       var msg=data.firstAccess?(es?'Aquí está la info de tu habitación.<br><b>Por seguridad:</b> mantén la puerta cerrada.':'Here is your room info.<br><b>For security:</b> keep the door closed.'):(es?'<b>Por seguridad:</b> mantén la puerta cerrada.':'<b>For security:</b> keep the door closed.');
-      showResult('success',tit,msg,roomHtml);
-      return;
+      showCard('success',tit,msg,roomHtml);return;
     }
-
-    // ── Errores ──
     var err=data.error;
-
-    if(err==='GEO_FAR'){
-      showResult('info',
-        es?'Fuera de rango':'Out of range',
-        (es?'Acércate a la puerta del hotel e intenta de nuevo.':'Get closer to the hotel door and try again.')+'<br><span style="font-size:10px;color:#999">'+(es?'Distancia':'Distance')+': '+(data.distance||'?')+'m</span>');
-      return;
-    }
-
-    if(err==='CHECKIN_REQUIRED'){
-      showResult('warning',
-        es?'Check-in requerido':'Check-in required',
-        data.message,
-        '<a class="door-btn green" href="https://www.minkahostel.com/checkin?id='+(data.uuid||'')+'&returnDoor=1&msg=checkin" target="_blank" style="margin-top:10px">📋 '+(es?'Completar Check-in':'Complete Check-in')+'</a>');
-      return;
-    }
-
+    if(err==='NO_ACTIVE_RESERVATION'){showCard('info',es?'Sin reserva activa':'No active reservation',es?'No se encontró una reserva activa para hoy.':'No active reservation found for today.');return;}
+    if(err==='GEO_FAR'){showCard('info',es?'Fuera de rango':'Out of range',(es?'Acércate a la puerta del hotel e intenta de nuevo.':'Get closer to the hotel door and try again.')+'<br><span style="font-size:10px;color:#999">'+(es?'Distancia':'Distance')+': '+(data.distance||'?')+'m</span>');return;}
+    if(err==='CHECKIN_REQUIRED'){showCard('warning',es?'Check-in requerido':'Check-in required',data.message,'','<a class="d-btn" href="https://www.minkahostel.com/checkin?id='+(data.uuid||'')+'&returnDoor=1&msg=checkin" target="_blank">📋 '+(es?'Completar Check-in':'Complete Check-in')+'</a>');return;}
     if(err==='BALANCE_WARNING'){
-      // Nombre del huésped + imagen + tabla de saldo + botón "Abrir puerta"
       var bal=data.balance||0;
-      var balHtml='<img src="'+IMG_BP+'" style="width:60px;margin:4px auto 8px;display:block">';
-      balHtml+='<div style="font-size:11px;color:#555;line-height:1.6;margin-bottom:10px">'+(es?'Tienes un saldo pendiente de <b>$'+bal.toFixed(2)+'</b>. Aún puedes abrir la puerta.':'You have a pending balance of <b>$'+bal.toFixed(2)+'</b>. You can still open the door.')+'</div>';
-      balHtml+='<table class="balance-table"><tr><td class="lbl">'+(es?'Concepto':'Item')+'</td><td class="val">'+(es?'Saldo':'Balance')+'</td></tr>';
-      balHtml+='<tr><td class="lbl">'+(es?'Hospedaje':'Accommodation')+'</td><td class="val">$'+bal.toFixed(2)+'</td></tr>';
-      balHtml+='<tr class="total"><td>Total</td><td class="val">$'+bal.toFixed(2)+'</td></tr></table>';
-      showResult('warning',es?'Saldo pendiente':'Pending balance','',balHtml);
-      // Botón verde "Abrir puerta"
-      actionsEl.innerHTML='<button class="door-btn green" id="_btnOpenDoor">'+(es?'Abrir puerta':'Open door')+'</button>';
-      document.getElementById('_btnOpenDoor').onclick=function(){resetForRetry();statusEl.textContent=es?'Abriendo puerta...':'Opening door...';callApi({confirmBalance:true})};
+      var bHtml='<img src="'+IMG_BP+'" style="width:60px;margin:4px auto 8px;display:block">';
+      bHtml+='<div style="font-size:11px;color:#555;line-height:1.6;margin-bottom:10px">'+(es?'Tienes un saldo pendiente de <b>$'+bal.toFixed(2)+'</b>. Aún puedes abrir la puerta.':'You have a pending balance of <b>$'+bal.toFixed(2)+'</b>. You can still open the door.')+'</div>';
+      bHtml+='<table class="balance-table"><tr><td style="color:#555">'+(es?'Concepto':'Item')+'</td><td style="text-align:right;font-weight:600">'+(es?'Saldo':'Balance')+'</td></tr>';
+      bHtml+='<tr><td style="color:#555">'+(es?'Hospedaje':'Accommodation')+'</td><td style="text-align:right;font-weight:600">$'+bal.toFixed(2)+'</td></tr>';
+      bHtml+='<tr class="total"><td>Total</td><td style="text-align:right;font-weight:700">$'+bal.toFixed(2)+'</td></tr></table>';
+      showCard('warning',es?'Saldo pendiente':'Pending balance','',bHtml,'<button class="d-btn" id="_bwo">'+(es?'Abrir puerta':'Open door')+'</button>');
+      document.getElementById('_bwo').onclick=function(){card.style.display='none';loading.style.display='block';statusEl.textContent=es?'Abriendo puerta...':'Opening door...';callApi({confirmBalance:true})};
       return;
     }
-
     if(err==='BALANCE_CHECKOUT'||err==='ENDED_BALANCE'||err==='DC_ENDED_BALANCE'||err==='DC_LAST_HOUR'){
-      var payHtml='<img src="'+IMG_BP+'" style="width:60px;margin:4px auto 8px;display:block">';
-      payHtml+='<div style="font-size:11px;color:#555;line-height:1.6;margin-bottom:10px">'+data.message+'</div>';
-      showResult('warning',es?'Saldo pendiente':'Pending balance','',payHtml);
-      // Botón verde "Pagar"
-      actionsEl.innerHTML='<a class="door-btn green" href="https://www.minkahostel.com/?t='+encodeURIComponent(token)+'" target="_blank">'+(es?'Pagar':'Pay')+'</a>';
+      var pHtml='<img src="'+IMG_BP+'" style="width:60px;margin:4px auto 8px;display:block">';
+      pHtml+='<div style="font-size:11px;color:#555;line-height:1.6">'+data.message+'</div>';
+      showCard('warning',es?'Saldo pendiente':'Pending balance','',pHtml,'<a class="d-btn" href="https://www.minkahostel.com/?t='+encodeURIComponent(token)+'" target="_blank">'+(es?'Pagar':'Pay')+'</a>');
       return;
     }
-
-    if(err==='DC_NOT_STARTED'){showResult('info',es?'Horario no disponible':'Schedule not available',data.message);return;}
-    if(err==='DC_ENDED'||err==='ENDED'){showResult('success',es?'Finalizado':'Ended',data.message);return;}
-    if(err==='CANCELLED'){showResult('error',es?'Reserva cancelada':'Reservation cancelled',data.message);return;}
-    if(err==='DISABLED'){showResult('warning',es?'Acceso deshabilitado':'Access disabled',data.message);return;}
-    if(err==='DOOR_FAIL'){showResult('error',es?'No se pudo abrir':'Could not open',es?'Presiona el timbre frente a la cámara y espera autorización.':'Press the doorbell in front of the camera and wait for authorization.');return;}
-    if(err==='GEO_REQUIRED'){showResult('warning',es?'Ubicación requerida':'Location required',es?'Activa la ubicación para este sitio.':'Enable location for this site.');return;}
-
-    // Genérico
-    showResult('error',data.message||'Error','');
+    if(err==='DC_NOT_STARTED'){showCard('info',es?'Horario no disponible':'Schedule not available',data.message);return;}
+    if(err==='DC_ENDED'||err==='ENDED'){showCard('success',es?'Finalizado':'Ended',data.message);return;}
+    if(err==='CANCELLED'){showCard('error',es?'Reserva cancelada':'Reservation cancelled',data.message);return;}
+    if(err==='DISABLED'){showCard('warning',es?'Acceso deshabilitado':'Access disabled',data.message);return;}
+    if(err==='DOOR_FAIL'){showCard('error',es?'No se pudo abrir':'Could not open',es?'Presiona el timbre frente a la cámara y espera autorización.':'Press the doorbell in front of the camera and wait for authorization.');return;}
+    if(err==='GEO_REQUIRED'){showCard('warning',es?'Ubicación requerida':'Location required',es?'Activa la ubicación para este sitio.':'Enable location for this site.');return;}
+    showCard('error',data.message||'Error','');
   }
 
-  // ── Obtener GPS ──
-  statusEl.textContent='Obteniendo ubicación...';
-  var geoData={lat:null,lng:null,acc:null};
-
-  if(navigator.geolocation){
-    navigator.geolocation.getCurrentPosition(
-      function(pos){geoData.lat=pos.coords.latitude;geoData.lng=pos.coords.longitude;geoData.acc=pos.coords.accuracy;callApi()},
-      function(){
-        // Geo denegada: intentar sin geo (el backend decidirá)
-        callApi();
-      },
-      {enableHighAccuracy:true,maximumAge:0,timeout:8000}
-    );
-  } else {
-    callApi();
-  }
+  // ── Click en botón candado ──
+  btnDoor.onclick=function(){
+    showOverlay();
+    statusEl.textContent='Obteniendo ubicación...';
+    geoData={lat:null,lng:null,acc:null};
+    if(navigator.geolocation){
+      navigator.geolocation.getCurrentPosition(
+        function(pos){geoData.lat=pos.coords.latitude;geoData.lng=pos.coords.longitude;geoData.acc=pos.coords.accuracy;callApi()},
+        function(){callApi()},
+        {enableHighAccuracy:true,maximumAge:0,timeout:8000}
+      );
+    } else {callApi()}
+  };
 
   // Prevenir back
   history.pushState({p:1},'','');
   var _lt=0;
   window.addEventListener('popstate',function(){var n=Date.now();if(n-_lt<800)return;_lt=n;history.pushState({p:1},'','')});
   if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(function(){});
-  return;
-}
-
-// ═══ MODO NORMAL (navegador) ═══
-var p=new URLSearchParams(window.location.search);
-token=p.get('t')||localStorage.getItem('minka_door_token')||'';
-if(p.get('t'))localStorage.setItem('minka_door_token',token);
-if(!token){var uuid=p.get('door')||'';var key=p.get('key')||'';if(uuid){token=btoa(uuid+'|'+key);localStorage.setItem('minka_door_token',token)}}
-var wixUrl='https://www.minkahostel.com/?t='+encodeURIComponent(token);
-document.getElementById('btnDoor').href=wixUrl;
-if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(function(){});
-var dp=null;
-window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();dp=e;document.getElementById('btnInstall').style.display='block'});
-document.getElementById('btnInstall').addEventListener('click',function(){if(dp){dp.prompt();dp.userChoice.then(function(r){if(r.outcome==='accepted'){document.getElementById('btnInstall').style.display='none';document.getElementById('okMsg').style.display='block'}dp=null})}});
-var isIos=/iPad|iPhone|iPod/.test(navigator.userAgent)&&!window.MSStream;
-if(isIos&&!window.navigator.standalone){document.getElementById('btnInstall').style.display='block';document.getElementById('btnInstall').onclick=function(){document.getElementById('guideIos').style.display='block'}}
-window.addEventListener('appinstalled',function(){document.getElementById('btnInstall').style.display='none';document.getElementById('okMsg').style.display='block'});
 })();
 </script>
 </body>
