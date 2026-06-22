@@ -129,9 +129,15 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 
   // Iframe Wix fullscreen — PARÁMETROS INAMOVIBLES
   var f=document.getElementById('appFrame');
-  f.style.width=Math.round(window.innerWidth/1.3)+'px';
-  f.style.height=Math.round(window.innerHeight/1.26)+'px';
+  function resizeFrame(){
+    f.style.width=Math.round(window.innerWidth/1.3)+'px';
+    f.style.height=Math.round(window.innerHeight/1.26)+'px';
+  }
+  resizeFrame();
   f.src='https://www.minkahostel.com';
+  // Recalcular si cambia el viewport (rotación, resize, vuelta de background)
+  window.addEventListener('resize',resizeFrame);
+  document.addEventListener('visibilitychange',function(){if(!document.hidden)resizeFrame()});
 
   // Botón candado: solo si hay token
   var btnDoor=document.getElementById('btnDoor');
