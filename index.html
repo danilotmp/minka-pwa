@@ -28,13 +28,19 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 /*
  ═══════════════════════════════════════════════════════════════════
  IFRAME WIX DENTRO DE PWA — PARÁMETROS INAMOVIBLES
+ CSS: position:fixed + left:50% + translateX(-50%) scale(1.3)
+      transform-origin:center top
+ JS:  width = innerWidth / 1.3
+      height = innerHeight / 1.26 - 18
+ Estos valores están calibrados para que Wix renderice correctamente
+ dentro del iframe en modo PWA standalone en dispositivos móviles.
  NO MODIFICAR sin probar en dispositivo real.
  ═══════════════════════════════════════════════════════════════════
 */
 #appFrame{position:fixed;top:0;left:50%;border:0;z-index:1;transform:translateX(-50%) scale(1.3);transform-origin:center top;-webkit-overflow-scrolling:touch}
-/* Botón flotante candado */
-#btnDoor{display:none;position:fixed;bottom:90px;right:16px;z-index:99999;width:48px;height:48px;border-radius:50%;background:#00A0B4;border:none;box-shadow:0 4px 12px rgba(0,160,180,.5);cursor:pointer;align-items:center;justify-content:center}
-#btnDoor svg{width:24px;height:24px;fill:#fff}
+/* Botón flotante candado — alineado arriba-izquierda del WhatsApp de Wix */
+#btnDoor{display:none;position:fixed;bottom:100px;right:20px;z-index:99999;width:44px;height:44px;border-radius:50%;background:#3d4a5c;border:none;box-shadow:0 4px 12px rgba(0,0,0,.4);cursor:pointer;align-items:center;justify-content:center}
+#btnDoor svg{width:22px;height:22px;fill:#fff}
 #btnDoor:active{transform:scale(0.92)}
 /* Overlay de resultado */
 @keyframes spin{to{transform:rotate(360deg)}}
@@ -142,6 +148,32 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
   // Botón candado: solo si hay token
   var btnDoor=document.getElementById('btnDoor');
   if(token){btnDoor.style.display='flex'}
+
+  // ── Guía de primera vez (onboarding) ──
+  if(token && !localStorage.getItem('minka_onboarding_done')){
+    setTimeout(function(){
+      // Overlay oscuro con spotlight en el botón
+      var ov=document.createElement('div');
+      ov.id='onboardingOv';
+      ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:199999;display:flex;align-items:flex-end;justify-content:flex-end;padding:20px;';
+      // Tooltip apuntando al botón
+      var tip=document.createElement('div');
+      tip.style.cssText='position:fixed;bottom:150px;right:16px;background:#fff;border-radius:10px;padding:12px 16px;max-width:200px;box-shadow:0 4px 16px rgba(0,0,0,.3);font-size:12px;color:#333;line-height:1.5;z-index:200000;';
+      tip.innerHTML='<b>🔓 Acceso a tu habitación</b><br><span style="font-size:11px;color:#555">Presiona este botón para abrir la puerta del hotel.</span><br><button id="onboardingOk" style="margin-top:8px;background:#3d4a5c;color:#fff;border:none;border-radius:6px;padding:6px 16px;font-size:11px;font-weight:600;cursor:pointer">Entendido</button>';
+      // Resaltar el botón (clonamos posición)
+      var highlight=document.createElement('div');
+      highlight.style.cssText='position:fixed;bottom:100px;right:20px;width:44px;height:44px;border-radius:50%;border:3px solid #fff;z-index:200000;box-shadow:0 0 0 4000px rgba(0,0,0,.6);';
+      ov.appendChild(highlight);
+      ov.appendChild(tip);
+      document.body.appendChild(ov);
+      document.getElementById('onboardingOk').addEventListener('click',function(){
+        ov.remove();
+        localStorage.setItem('minka_onboarding_done','1');
+      });
+      // También cerrar al tocar fuera
+      ov.addEventListener('click',function(e){if(e.target===ov){ov.remove();localStorage.setItem('minka_onboarding_done','1')}});
+    },2000); // Esperar 2s para que cargue el iframe
+  }
 
   // ── Overlay elements ──
   var overlay=document.getElementById('doorOverlay');
