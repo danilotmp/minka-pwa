@@ -141,7 +141,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
     f.style.height=Math.round(window.innerHeight/1.26 - 18)+'px';
   }
   resizeFrame();
-  f.src='https://www.minkahostel.com';
+  // Determinar URL del iframe según tipo de usuario (admin vs huésped)
+  var decoded='';try{decoded=atob(token)}catch(e){}
+  var isAdmin=decoded.indexOf('admin|')===0;
+  f.src=isAdmin?'https://www.minkahostel.com/reservas-hospedaje':'https://www.minkahostel.com';
   // Recalcular si cambia el viewport (rotación, resize, vuelta de background)
   window.addEventListener('resize',resizeFrame);
   document.addEventListener('visibilitychange',function(){if(!document.hidden)resizeFrame()});
