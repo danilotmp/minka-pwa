@@ -151,7 +151,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 
   // Botón candado: solo si hay token
   var btnDoor=document.getElementById('btnDoor');
-  if(token){btnDoor.style.display='flex'}
+  if(token){
+    btnDoor.style.display='flex';
+    // Para admin: posicionar sobre el botón de WhatsApp de Wix (más abajo)
+    if(isAdmin){btnDoor.style.bottom='24px'}
+  }
 
   // ── Splash de carga (siempre, se desvanece cuando el iframe carga) ──
   var splash=document.createElement('div');
