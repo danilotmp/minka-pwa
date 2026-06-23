@@ -153,10 +153,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
   var btnDoor=document.getElementById('btnDoor');
   if(token){
     btnDoor.style.display='flex';
-    // Para admin: posicionar sobre el WhatsApp de Wix (mismo tamaño, solo mover)
+    // Para admin: botón más grande para tapar WhatsApp de Wix, posicionado sobre él
     if(isAdmin){
       btnDoor.style.bottom='30px';
       btnDoor.style.right='34px';
+      btnDoor.style.width='60px';
+      btnDoor.style.height='60px';
     }
   }
 
@@ -168,7 +170,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
   document.body.appendChild(splash);
 
   var splashRemoved=false;
-  var showOnboarding=token && !isAdmin && !localStorage.getItem('minka_onboarding_done');
+  var showOnboarding=token && !localStorage.getItem('minka_onboarding_done');
 
   function removeSplash(){
     if(splashRemoved)return;splashRemoved=true;
@@ -176,15 +178,20 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
     setTimeout(function(){
       splash.remove();
       if(showOnboarding){
+        // Posiciones según tipo de usuario
+        var hlBottom=isAdmin?'30px':'100px';
+        var hlRight=isAdmin?'34px':'27px';
+        var hlSize=isAdmin?'60px':'44px';
+        var tipBottom=isAdmin?'100px':'150px';
         // Mostrar tooltip del botón
         var ov=document.createElement('div');
         ov.id='onboardingOv';
         ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:199999;display:flex;align-items:flex-end;justify-content:flex-end;padding:20px;';
         var tip=document.createElement('div');
-        tip.style.cssText='position:fixed;bottom:150px;right:20px;background:#fff;border-radius:10px;padding:14px 18px;max-width:260px;box-shadow:0 4px 16px rgba(0,0,0,.3);font-size:12px;color:#333;line-height:1.5;z-index:200000;';
+        tip.style.cssText='position:fixed;bottom:'+tipBottom+';right:20px;background:#fff;border-radius:10px;padding:14px 18px;max-width:260px;box-shadow:0 4px 16px rgba(0,0,0,.3);font-size:12px;color:#333;line-height:1.5;z-index:200000;';
         tip.innerHTML='<b>🔓 Puerta de acceso</b><br><span style="font-size:11px;color:#555">Presiona este botón para abrir la puerta del hotel.</span><br><span style="font-size:9px;color:#999;font-style:italic;display:block;margin-top:6px">Por tu seguridad, no permitas el ingreso de extraños y mantén la puerta siempre cerrada.</span><br><button id="onboardingOk" style="margin-top:8px;background:#00A0B4;color:#fff;border:none;border-radius:6px;padding:6px 16px;font-size:11px;font-weight:600;cursor:pointer">Entendido</button>';
         var highlight=document.createElement('div');
-        highlight.style.cssText='position:fixed;bottom:100px;right:27px;width:44px;height:44px;border-radius:50%;border:3px solid #fff;z-index:200000;box-shadow:0 0 0 4000px rgba(0,0,0,.3);';
+        highlight.style.cssText='position:fixed;bottom:'+hlBottom+';right:'+hlRight+';width:'+hlSize+';height:'+hlSize+';border-radius:50%;border:3px solid #fff;z-index:200000;box-shadow:0 0 0 4000px rgba(0,0,0,.3);';
         ov.appendChild(highlight);
         ov.appendChild(tip);
         document.body.appendChild(ov);
