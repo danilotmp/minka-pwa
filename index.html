@@ -153,10 +153,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
   var btnDoor=document.getElementById('btnDoor');
   if(token){
     btnDoor.style.display='flex';
-    // Para admin: botón posicionado sobre el WhatsApp de Wix
+    // Para admin: botón más grande posicionado sobre el WhatsApp de Wix
     if(isAdmin){
       btnDoor.style.bottom='30px';
       btnDoor.style.right='34px';
+      btnDoor.style.width='60px';
+      btnDoor.style.height='60px';
     }
   }
 
@@ -179,8 +181,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
         // Posiciones según tipo de usuario
         var hlBottom=isAdmin?'30px':'100px';
         var hlRight=isAdmin?'34px':'27px';
-        var hlSize='44px';
-        var tipBottom=isAdmin?'80px':'150px';
+        var hlSize=isAdmin?'60px':'44px';
+        var tipBottom=isAdmin?'100px':'150px';
         // Mostrar tooltip del botón
         var ov=document.createElement('div');
         ov.id='onboardingOv';
