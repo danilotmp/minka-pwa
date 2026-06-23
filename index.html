@@ -153,12 +153,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
   var btnDoor=document.getElementById('btnDoor');
   if(token){
     btnDoor.style.display='flex';
-    // Para admin: botón más grande para tapar WhatsApp de Wix, posicionado sobre él
+    // Para admin: botón posicionado sobre el WhatsApp de Wix
     if(isAdmin){
       btnDoor.style.bottom='30px';
       btnDoor.style.right='34px';
-      btnDoor.style.width='60px';
-      btnDoor.style.height='60px';
     }
   }
 
@@ -181,8 +179,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
         // Posiciones según tipo de usuario
         var hlBottom=isAdmin?'30px':'100px';
         var hlRight=isAdmin?'34px':'27px';
-        var hlSize=isAdmin?'60px':'44px';
-        var tipBottom=isAdmin?'100px':'150px';
+        var hlSize='44px';
+        var tipBottom=isAdmin?'80px':'150px';
         // Mostrar tooltip del botón
         var ov=document.createElement('div');
         ov.id='onboardingOv';
@@ -301,16 +299,28 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 
   // ── Click en botón candado ──
   btnDoor.onclick=function(){
-    showOverlay();
-    statusEl.textContent='Obteniendo ubicación...';
-    geoData={lat:null,lng:null,acc:null};
-    if(navigator.geolocation){
-      navigator.geolocation.getCurrentPosition(
-        function(pos){geoData.lat=pos.coords.latitude;geoData.lng=pos.coords.longitude;geoData.acc=pos.coords.accuracy;callApi()},
-        function(){callApi()},
-        {enableHighAccuracy:true,maximumAge:0,timeout:8000}
-      );
-    } else {callApi()}
+    // Modal de confirmación antes de abrir
+    overlay.classList.add('active');
+    loading.style.display='none';
+    card.style.display='block';
+    iconEl.className='d-icon info';iconEl.style.display='flex';iconEl.textContent='🔓';
+    titleEl.className='d-title info';titleEl.textContent=isAdmin?'Abrir puerta':'Abrir puerta';
+    msgEl.innerHTML=isAdmin?'¿Confirmas la apertura de la puerta?':'¿Confirmas la apertura de la puerta?<br><span style="font-size:9px;color:#999">Se verificará tu ubicación</span>';
+    extraEl.innerHTML='';
+    actionsEl.innerHTML='<button class="d-btn" id="_confirmDoor">Confirmar</button>';
+    document.getElementById('_confirmDoor').onclick=function(){
+      card.style.display='none';loading.style.display='block';
+      // Siempre intentar obtener geo y enviarla — el backend decide si la valida según parametrización
+      statusEl.textContent='Abriendo puerta...';
+      geoData={lat:null,lng:null,acc:null};
+      if(navigator.geolocation){
+        navigator.geolocation.getCurrentPosition(
+          function(pos){geoData.lat=pos.coords.latitude;geoData.lng=pos.coords.longitude;geoData.acc=pos.coords.accuracy;callApi()},
+          function(){callApi()},
+          {enableHighAccuracy:true,maximumAge:0,timeout:8000}
+        );
+      } else {callApi()}
+    };
   };
 
   // Prevenir back
