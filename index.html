@@ -153,12 +153,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
   var btnDoor=document.getElementById('btnDoor');
   if(token){
     btnDoor.style.display='flex';
-    // Para admin: más grande y posicionado sobre el WhatsApp de Wix
+    // Para admin: posicionar sobre el WhatsApp de Wix (mismo tamaño, solo mover)
     if(isAdmin){
-      btnDoor.style.bottom='16px';
-      btnDoor.style.right='16px';
-      btnDoor.style.width='56px';
-      btnDoor.style.height='56px';
+      btnDoor.style.bottom='30px';
+      btnDoor.style.right='34px';
     }
   }
 
