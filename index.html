@@ -156,7 +156,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
     // Para admin: botón más grande posicionado sobre el WhatsApp de Wix
     if(isAdmin){
       btnDoor.style.bottom='20px';
-      btnDoor.style.right='20px';
+      btnDoor.style.right='22px';
       btnDoor.style.width='60px';
       btnDoor.style.height='60px';
     }
@@ -179,8 +179,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
       splash.remove();
       if(showOnboarding){
         // Posiciones según tipo de usuario
-        var hlBottom=isAdmin?'25px':'100px';
-        var hlRight=isAdmin?'29px':'27px';
+        var hlBottom=isAdmin?'20px':'100px';
+        var hlRight=isAdmin?'22px':'27px';
         var hlSize=isAdmin?'60px':'44px';
         var tipBottom=isAdmin?'100px':'150px';
         // Mostrar tooltip del botón
@@ -305,11 +305,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
     overlay.classList.add('active');
     loading.style.display='none';
     card.style.display='block';
-    iconEl.className='d-icon info';iconEl.style.display='flex';iconEl.textContent='🔓';
-    titleEl.className='d-title info';titleEl.textContent=isAdmin?'Abrir puerta':'Abrir puerta';
+    iconEl.className='d-icon';iconEl.style.display='flex';iconEl.style.background='#00A0B4';iconEl.innerHTML='<svg viewBox="0 0 24 24" style="width:24px;height:24px;fill:#fff"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zM12 17c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zM9 8V6c0-1.66 1.34-3 3-3s3 1.34 3 3v2H9z"/></svg>';
+    titleEl.className='d-title';titleEl.style.color='#1e3a5f';titleEl.textContent='Abrir puerta';
     msgEl.innerHTML=isAdmin?'¿Confirmas la apertura de la puerta?':'¿Confirmas la apertura de la puerta?<br><span style="font-size:9px;color:#999">Se verificará tu ubicación</span>';
     extraEl.innerHTML='';
-    actionsEl.innerHTML='<button class="d-btn" id="_confirmDoor">Confirmar</button>';
+    actionsEl.innerHTML='<button class="d-btn" id="_confirmDoor" style="background:#00A0B4;box-shadow:0 3px 8px rgba(0,160,180,.4)">Confirmar</button>';
     document.getElementById('_confirmDoor').onclick=function(){
       card.style.display='none';loading.style.display='block';
       // Siempre intentar obtener geo y enviarla — el backend decide si la valida según parametrización
