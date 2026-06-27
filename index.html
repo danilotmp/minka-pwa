@@ -128,11 +128,19 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
       document.getElementById('btnOpen').href='#';
       document.getElementById('btnOpen').onclick=function(e){
         e.preventDefault();
-        // Ocultar card y mostrar overlay de apertura
+        // Ocultar card de instalación
         document.getElementById('installCard').classList.remove('active');
+        // Mostrar iframe con la página de Minka por detrás
+        var f=document.getElementById('appFrame');
+        function resizeFrame(){
+          f.style.width=Math.round(window.innerWidth/1.3)+'px';
+          f.style.height=Math.round(window.innerHeight/1.26 - 18)+'px';
+        }
+        resizeFrame();
+        f.src=wixUrl;
+        window.addEventListener('resize',resizeFrame);
+        // Mostrar overlay de apertura encima del iframe
         document.getElementById('doorOverlay').classList.add('active');
-        // Abrir página Minka en paralelo (nueva pestaña si es posible, sino detrás)
-        window.open(wixUrl,'_blank');
         // Iniciar flujo de apertura
         startDoorFlow();
         return false;
