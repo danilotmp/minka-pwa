@@ -216,9 +216,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
               showCardBrowser('error',es?'No se pudo abrir':'Could not open',
                 es?'Presiona el timbre frente a la cámara.':'Press the doorbell in front of the camera.');
             } else if(data.error==='DISABLED'||data.error==='ENDED'||data.error==='CANCELLED'||data.error==='DC_ENDED'||data.error==='DC_NOT_STARTED'){
-              showCardBrowser('info',data.message||'','');
+              showCardBrowser('error',es?'Acceso no autorizado':'Access denied',data.message||'');
+            } else if(data.error==='DOOR_FAIL'){
+              showCardBrowser('error',es?'Acceso no autorizado':'Access denied',
+                es?'No se pudo abrir la puerta. Presiona el timbre frente a la cámara y espera autorización.':'Could not open the door. Press the doorbell in front of the camera and wait for authorization.');
             } else {
-              showCardBrowser('warning',data.message||'Error','');
+              showCardBrowser('error',es?'Acceso no autorizado':'Access denied',data.message||'');
             }
           }).catch(function(e){showCardBrowser('error','Error',e.message||'Connection error')});
         },function(err){
@@ -392,14 +395,14 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
     }
     if(err==='DC_NOT_STARTED'){showCard('info',es?'Horario no disponible':'Schedule not available',data.message);return;}
     if(err==='DC_ENDED'||err==='ENDED'){showCard('success',es?'Finalizado':'Ended',data.message);return;}
-    if(err==='CANCELLED'){showCard('error',es?'Reserva cancelada':'Reservation cancelled',data.message);return;}
-    if(err==='DISABLED'){showCard('warning',es?'Acceso deshabilitado':'Access disabled',data.message);return;}
-    if(err==='DOOR_FAIL'){showCard('error',es?'No se pudo abrir':'Could not open',es?'Presiona el timbre frente a la cámara y espera autorización.':'Press the doorbell in front of the camera and wait for authorization.');return;}
+    if(err==='CANCELLED'){showCard('error',es?'Acceso no autorizado':'Access denied',data.message);return;}
+    if(err==='DISABLED'){showCard('error',es?'Acceso no autorizado':'Access denied',data.message);return;}
+    if(err==='DOOR_FAIL'){showCard('error',es?'Acceso no autorizado':'Access denied',es?'No se pudo abrir la puerta. Presiona el timbre frente a la cámara y espera autorización.':'Could not open the door. Press the doorbell in front of the camera and wait for authorization.');return;}
     if(err==='GEO_REQUIRED'){
       var geoMsg=es?'Para abrir la puerta necesitamos verificar que estés cerca del hotel. Activa la ubicación en <b>Configuración > Permisos > Ubicación</b> para este sitio y vuelve a intentar.':'To open the door we need to verify you are near the hotel. Enable location in <b>Settings > Permissions > Location</b> for this site and try again.';
       showCard('warning',es?'Ubicación requerida':'Location required',geoMsg);return;
     }
-    showCard('error',data.message||'Error','');
+    showCard('error',es?'Acceso no autorizado':'Access denied',data.message||'');
   }
 
   // ── Click en botón candado ──
