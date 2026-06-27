@@ -194,7 +194,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
             var es=data.lang==='es';
             if(data.success){
               showCardBrowser('success',data.firstAccess?(es?'¡Bienvenido!':'Welcome!'):(es?'Acceso concedido':'Access granted'),
-                es?'<b>Por seguridad:</b> mantén la puerta cerrada.':'<b>For security:</b> keep the door closed.');
+                es?'<b>Por tu seguridad:</b> no permitas el ingreso de extraños y mantén la puerta siempre cerrada.':'<b>For your security:</b> do not allow strangers in and always keep the door closed.');
             } else if(data.error==='BALANCE_WARNING'){
               showCardBrowser('warning',es?'Saldo pendiente':'Pending balance',data.message,'',
                 '<button class="d-btn" id="_bwoBr">'+(es?'Abrir puerta':'Open Door')+'</button>');
@@ -356,7 +356,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
         });
       }
       var tit=data.firstAccess?(es?'¡Bienvenido, '+data.name+'!':'Welcome, '+data.name+'!'):(es?'Acceso concedido':'Access granted');
-      var msg=data.firstAccess?(es?'Aquí está la info de tu habitación.<br><b>Por seguridad:</b> mantén la puerta cerrada.':'Here is your room info.<br><b>For security:</b> keep the door closed.'):(es?'<b>Por seguridad:</b> mantén la puerta cerrada.':'<b>For security:</b> keep the door closed.');
+      var msg=data.firstAccess?(es?'Aquí está la info de tu habitación.<br><b>Por tu seguridad:</b> no permitas el ingreso de extraños y mantén la puerta siempre cerrada.':'Here is your room info.<br><b>For your security:</b> do not allow strangers in and always keep the door closed.'):(es?'<b>Por tu seguridad:</b> no permitas el ingreso de extraños y mantén la puerta siempre cerrada.':'<b>For your security:</b> do not allow strangers in and always keep the door closed.');
       showCard('success',tit,msg,roomHtml);return;
     }
     var err=data.error;
