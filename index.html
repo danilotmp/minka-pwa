@@ -273,10 +273,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
     if(err==='BALANCE_WARNING'){
       var bal=data.balance||0;
       var bHtml='<img src="'+IMG_BP+'" style="width:60px;margin:4px auto 8px;display:block">';
-      bHtml+='<div style="font-size:11px;color:#555;line-height:1.6;margin-bottom:10px">'+(es?'Tienes un saldo pendiente de <b>$'+bal.toFixed(2)+'</b>. Aún puedes abrir la puerta.':'You have a pending balance of <b>$'+bal.toFixed(2)+'</b>. You can still open the door.')+'</div>';
-      bHtml+='<table class="balance-table"><tr><td style="color:#555">'+(es?'Concepto':'Item')+'</td><td style="text-align:right;font-weight:600">'+(es?'Saldo':'Balance')+'</td></tr>';
-      bHtml+='<tr><td style="color:#555">'+(es?'Hospedaje':'Accommodation')+'</td><td style="text-align:right;font-weight:600">$'+bal.toFixed(2)+'</td></tr>';
-      bHtml+='<tr class="total"><td>Total</td><td style="text-align:right;font-weight:700">$'+bal.toFixed(2)+'</td></tr></table>';
+      bHtml+='<div style="font-size:11px;color:#555;line-height:1.6;margin-bottom:10px">'+data.message+'</div>';
+      if(bal>0){
+        bHtml+='<table class="balance-table"><tr><td style="color:#555">'+(es?'Concepto':'Item')+'</td><td style="text-align:right;font-weight:600">'+(es?'Saldo':'Balance')+'</td></tr>';
+        bHtml+='<tr><td style="color:#555">'+(es?'Hospedaje':'Accommodation')+'</td><td style="text-align:right;font-weight:600">$'+bal.toFixed(2)+'</td></tr>';
+        bHtml+='<tr class="total"><td>Total</td><td style="text-align:right;font-weight:700">$'+bal.toFixed(2)+'</td></tr></table>';
+      }
       showCard('warning',es?'Saldo pendiente':'Pending balance','',bHtml,'<button class="d-btn" id="_bwo">'+(es?'Abrir puerta':'Open door')+'</button>');
       document.getElementById('_bwo').onclick=function(){card.style.display='none';loading.style.display='block';statusEl.textContent=es?'Abriendo puerta...':'Opening door...';callApi({confirmBalance:true})};
       return;
@@ -284,7 +286,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
     if(err==='BALANCE_CHECKOUT'||err==='ENDED_BALANCE'||err==='DC_ENDED_BALANCE'||err==='DC_LAST_HOUR'){
       var pHtml='<img src="'+IMG_BP+'" style="width:60px;margin:4px auto 8px;display:block">';
       pHtml+='<div style="font-size:11px;color:#555;line-height:1.6">'+data.message+'</div>';
-      showCard('warning',es?'Saldo pendiente':'Pending balance','',pHtml,'<a class="d-btn" href="https://www.minkahostel.com/?t='+encodeURIComponent(token)+'" target="_blank">'+(es?'Pagar':'Pay')+'</a>');
+      showCard('warning',es?'Saldo pendiente':'Pending balance','',pHtml,data.balance>0?'<a class="d-btn" href="https://www.minkahostel.com/?t='+encodeURIComponent(token)+'" target="_blank">'+(es?'Pagar':'Pay')+'</a>':'');
       return;
     }
     if(err==='DC_NOT_STARTED'){showCard('info',es?'Horario no disponible':'Schedule not available',data.message);return;}
