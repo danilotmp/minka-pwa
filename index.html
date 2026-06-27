@@ -133,13 +133,15 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
         e.stopPropagation();
         // Ocultar card de instalación
         document.getElementById('installCard').classList.remove('active');
-        // Cargar Minka en el iframe existente (sin token para evitar doble apertura)
+        // Cargar Minka en el iframe (usa CSS ya definido: scale 1.3, posición fija)
         var f=document.getElementById('appFrame');
-        f.style.width=window.innerWidth+'px';
-        f.style.height=window.innerHeight+'px';
-        f.style.transform='none';
-        f.style.left='0';
+        function resizeFrame(){
+          f.style.width=Math.round(window.innerWidth/1.3)+'px';
+          f.style.height=Math.round(window.innerHeight/1.26 - 18)+'px';
+        }
+        resizeFrame();
         f.src='https://www.minkahostel.com';
+        window.addEventListener('resize',resizeFrame);
         // Mostrar overlay de apertura encima
         document.getElementById('doorOverlay').classList.add('active');
         // Ejecutar apertura
