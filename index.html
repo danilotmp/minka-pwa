@@ -122,31 +122,29 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
     document.getElementById('installCard').classList.add('active');
     var wixUrl='https://www.minkahostel.com'+(token?'/?t='+encodeURIComponent(token):'');
 
-    // Si hay token: el botón principal abre la puerta directamente (misma lógica PWA)
-    // y por detrás carga la página de Minka
+    // Si hay token: al tocar el botón, abrir puerta + cargar Minka en iframe simultáneamente
     if(token){
-      document.getElementById('btnOpen').href='#';
-      document.getElementById('btnOpen').onclick=function(e){
+      var btnOpen=document.getElementById('btnOpen');
+      btnOpen.removeAttribute('href');
+      btnOpen.style.cursor='pointer';
+      btnOpen.innerHTML='&#128275; Abrir Puerta<br><span style="font-size:11px;font-weight:400;opacity:.7">Open Door</span>';
+      btnOpen.addEventListener('click',function(e){
         e.preventDefault();
+        e.stopPropagation();
         // Ocultar card de instalación
         document.getElementById('installCard').classList.remove('active');
-        // Mostrar iframe con la página de Minka por detrás
+        // Cargar Minka en el iframe existente (sin token para evitar doble apertura)
         var f=document.getElementById('appFrame');
-        function resizeFrame(){
-          f.style.width=Math.round(window.innerWidth/1.3)+'px';
-          f.style.height=Math.round(window.innerHeight/1.26 - 18)+'px';
-        }
-        resizeFrame();
-        f.src=wixUrl;
-        window.addEventListener('resize',resizeFrame);
-        // Mostrar overlay de apertura encima del iframe
+        f.style.width=window.innerWidth+'px';
+        f.style.height=window.innerHeight+'px';
+        f.style.transform='none';
+        f.style.left='0';
+        f.src='https://www.minkahostel.com';
+        // Mostrar overlay de apertura encima
         document.getElementById('doorOverlay').classList.add('active');
-        // Iniciar flujo de apertura
+        // Ejecutar apertura
         startDoorFlow();
-        return false;
-      };
-      // Cambiar texto del botón
-      document.getElementById('btnOpen').innerHTML='&#128275; Abrir Puerta<br><span style="font-size:11px;font-weight:400;opacity:.7">Open Door</span>';
+      });
     } else {
       document.getElementById('btnOpen').href=wixUrl;
     }
