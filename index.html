@@ -110,12 +110,53 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 (function(){
   var API_URL='https://www.minkahostel.com/_functions/doorAccess';
   var IMG_BP='https://static.wixstatic.com/media/16b791_24235df3f3974f1d9712287154c039b0~mv2.png';
+  var WIX_ORIGIN='https://www.minkahostel.com';
   var isStandalone=window.matchMedia('(display-mode: standalone)').matches||(window.navigator&&window.navigator.standalone);
+
+  function buildIframeSrc(isAdmin, tok){
+    var base=isAdmin?WIX_ORIGIN+'/reservas-hospedaje':WIX_ORIGIN;
+    if(!tok)return base;
+    return base+'?t='+encodeURIComponent(tok)+'&pwa=1';
+  }
 
   // Token: leer de URL o localStorage
   var params=new URLSearchParams(window.location.search);
   var token=params.get('t')||localStorage.getItem('minka_token')||'';
   if(params.get('t'))localStorage.setItem('minka_token',token);
+
+  var decodedToken='';try{decodedToken=atob(token)}catch(e){}
+  var isAdminToken=decodedToken.indexOf('admin|')===0;
+
+  // Escuchar eventos del iframe Wix (login / logout)
+  window.addEventListener('message',function(ev){
+    if(!ev.data||!ev.data.type)return;
+    if(ev.origin&&ev.origin.indexOf('minkahostel.com')===-1)return;
+    if(ev.data.type==='minkaLogout'){
+      localStorage.removeItem('minka_token');
+      token='';
+      var bd=document.getElementById('btnDoor');if(bd)bd.style.display='none';
+    }
+    if(ev.data.type==='minkaNeedLogin'){
+      var ov=document.getElementById('doorOverlay');
+      if(!ov)return;
+      ov.classList.add('active');
+      document.getElementById('doorLoading').style.display='none';
+      var card=document.getElementById('doorCard');
+      card.style.display='block';
+      document.getElementById('doorIcon').className='d-icon info';
+      document.getElementById('doorIcon').textContent='◎';
+      document.getElementById('doorTitle').className='d-title info';
+      document.getElementById('doorTitle').textContent='Sesión expirada';
+      document.getElementById('doorMsg').innerHTML='Tu sesión de Wix expiró. Toca continuar para iniciar sesión nuevamente.';
+      document.getElementById('doorExtra').innerHTML='';
+      document.getElementById('doorActions').innerHTML='<button class="d-btn" id="_pwaRelogin" style="background:#00A0B4">Continuar</button>';
+      document.getElementById('_pwaRelogin').onclick=function(){
+        ov.classList.remove('active');
+        var fr=document.getElementById('appFrame');
+        if(fr)fr.src=buildIframeSrc(isAdminToken,token);
+      };
+    }
+  });
 
   // ═══ MODO NAVEGADOR (no instalado) ═══
   if(!isStandalone){
@@ -140,7 +181,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
           f.style.height=Math.round(window.innerHeight/1.26 - 18)+'px';
         }
         resizeFrame();
-        f.src='https://www.minkahostel.com';
+        f.src=buildIframeSrc(false,token);
         window.addEventListener('resize',resizeFrame);
         // Mostrar overlay de apertura encima
         document.getElementById('doorOverlay').classList.add('active');
@@ -246,12 +287,17 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
   }
   resizeFrame();
   // Determinar URL del iframe según tipo de usuario (admin vs huésped)
-  var decoded='';try{decoded=atob(token)}catch(e){}
-  var isAdmin=decoded.indexOf('admin|')===0;
-  f.src=isAdmin?'https://www.minkahostel.com/reservas-hospedaje':'https://www.minkahostel.com';
+  var isAdmin=isAdminToken;
+  f.src=buildIframeSrc(isAdmin,token);
   // Recalcular si cambia el viewport (rotación, resize, vuelta de background)
   window.addEventListener('resize',resizeFrame);
-  document.addEventListener('visibilitychange',function(){if(!document.hidden)resizeFrame()});
+  document.addEventListener('visibilitychange',function(){
+    if(!document.hidden&&token){
+      var fr=document.getElementById('appFrame');
+      if(fr&&!fr.src)fr.src=buildIframeSrc(isAdmin,token);
+    }
+    if(!document.hidden)resizeFrame();
+  });
 
   // Botón candado: solo si hay token
   var btnDoor=document.getElementById('btnDoor');
