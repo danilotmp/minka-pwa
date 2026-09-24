@@ -50,8 +50,13 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 #pwaHub .hub-note{margin-top:14px;font-size:11px;color:#999;line-height:1.45}
 #pwaHub .hub-note .en{display:block;font-size:10px;color:#aaa;margin-top:4px}
 #pwaHub .hub-intro .en{font-size:11px;color:#999}
-#pwaHub .hub-btn{display:block;width:100%;padding:14px 16px;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;margin-bottom:0;text-decoration:none;color:#fff;line-height:1.35}
-#pwaHub .hub-btn .hub-btn-sub{display:block;font-size:11px;font-weight:400;opacity:.88;margin-top:5px}
+#pwaHub .hub-btn{display:flex;width:100%;padding:12px 14px;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;margin-bottom:0;text-decoration:none;color:#fff;line-height:1.35;align-items:center}
+#pwaHub .hub-btn-layout{display:flex;align-items:center;gap:14px;width:100%;text-align:left}
+#pwaHub .hub-btn-icon{flex-shrink:0;width:52px;height:52px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.2);border-radius:12px;align-self:stretch;min-height:52px}
+#pwaHub .hub-btn-icon svg{width:30px;height:30px;fill:#fff;display:block}
+#pwaHub .hub-btn-text{flex:1;min-width:0}
+#pwaHub .hub-btn-main{display:block;font-size:15px;font-weight:700;line-height:1.3}
+#pwaHub .hub-btn-sub{display:block;font-size:11px;font-weight:400;opacity:.9;margin-top:4px;line-height:1.3}
 #pwaHub .hub-btn-door{background:#00A0B4;box-shadow:0 4px 12px rgba(0,160,180,.45);margin-bottom:0}
 #pwaHub .hub-btn:active{transform:scale(0.98)}
 .install-banner{display:none;position:fixed;top:max(10px,env(safe-area-inset-top));left:12px;right:12px;z-index:100002;align-items:center;gap:10px;padding:10px 12px;background:#fff;border-radius:14px;box-shadow:0 6px 24px rgba(0,0,0,.22);cursor:pointer;border:1px solid rgba(0,160,180,.25)}
@@ -129,7 +134,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
     <div class="hub-logo"><img src="https://static.wixstatic.com/media/16b791_bc5ee8f8d8fe4e8d80c935db3aafd599~mv2.png" alt="Minka"></div>
     <h2>Minka Backpackers</h2>
     <p class="hub-intro" id="hubIntro">Escanea el QR en la puerta de entrada del hotel.<br><span class="en">Scan the QR on the hotel entrance door.</span></p>
-    <button type="button" class="hub-btn hub-btn-door" id="hubBtnDoor">&#128247; Abrir puerta · Open door<span class="hub-btn-sub">Escanear QR · Scan QR</span></button>
+    <button type="button" class="hub-btn hub-btn-door" id="hubBtnDoor">
+      <span class="hub-btn-layout">
+        <span class="hub-btn-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 4h4v2H6v2H4V4zm10 0h6v6h-2V6h-4V4zM4 14h2v2h2v2H4v-4zm16 0v4h-4v-2h2v-2h2zM9 9h2v2H9V9zm4 0h2v2h-2V9zm-4 4h2v2H9v-2zm4 0h2v2h-2v-2zm4-8h2v2h-2V5zm0 4h2v2h-2V9zm-4 4h2v2h-2v-2zm4 0h2v2h-2v-2zm0 4h2v2h-2v-2z"/></svg></span>
+        <span class="hub-btn-text"><span class="hub-btn-main">Abrir puerta · Open door</span><span class="hub-btn-sub">Escanear QR · Scan QR</span></span>
+      </span>
+    </button>
     <p class="hub-note" id="hubNote">No olvides dar permisos de acceso a la cámara.<span class="en">Allow camera access when your phone asks.</span></p>
   </div>
 </div>
