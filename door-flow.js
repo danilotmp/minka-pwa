@@ -104,9 +104,11 @@ window.MinkaDoorFlow = function(cfg) {
     stopScanner();
     if (e.overlay) e.overlay.classList.remove('active');
     resetOverlay();
-    if (hintFab && cfg.onDoorOverlayClosed) {
+    if (hintFab) {
       try { localStorage.setItem('minka_door_fab_hint_done', '1'); } catch (err2) {}
-      cfg.onDoorOverlayClosed({ fromRect: fromRect });
+    }
+    if (cfg.onDoorOverlayClosed) {
+      cfg.onDoorOverlayClosed({ fromRect: fromRect, hintFab: hintFab });
     }
   }
 
@@ -210,6 +212,9 @@ window.MinkaDoorFlow = function(cfg) {
       showCard('success', tit, msg, roomHtml, actions, guestUi);
       var acceptBtn = document.getElementById('_doorAccept');
       if (acceptBtn) acceptBtn.onclick = function() { closeOverlay({ fabHint: true }); };
+      if (!data.firstAccess && guestUi) {
+        setTimeout(function() { closeOverlay(); }, 2400);
+      }
       return;
     }
 

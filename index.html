@@ -57,18 +57,25 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .home-backpacker-art img{max-width:100%;max-height:64px;object-fit:contain}
 .home-backpacker-main{flex:1;background:#e53935;color:#fff;display:flex;align-items:center;justify-content:space-between;padding:14px 16px;font-size:18px;font-weight:800}
 .home-backpacker-main svg{width:28px;height:28px;fill:#fff;flex-shrink:0}
-.home-door-panel{margin:12px 16px;padding:14px;background:#fff;border-radius:14px;box-shadow:0 2px 12px rgba(0,0,0,.06)}
-.home-door-panel p{font-size:12px;color:#555;line-height:1.45;margin-bottom:10px}
-.home-door-panel .hub-note{margin-top:8px;font-size:10px;color:#999}
-#pwaHub .hub-btn{display:flex;width:100%;padding:12px 14px;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;margin-bottom:0;text-decoration:none;color:#fff;line-height:1.35;align-items:center}
-#pwaHub .hub-btn-layout{display:flex;align-items:center;gap:8px;width:100%}
-#pwaHub .hub-btn-icon{flex-shrink:0;width:52px;height:52px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.2);border-radius:12px;align-self:stretch;min-height:52px}
-#pwaHub .hub-btn-icon svg{width:30px;height:30px;fill:#fff;display:block}
-#pwaHub .hub-btn-text{flex:1;min-width:0;text-align:center;padding:0 2px}
-#pwaHub .hub-btn-main{display:block;font-size:15px;font-weight:700;line-height:1.3}
-#pwaHub .hub-btn-sub{display:block;font-size:11px;font-weight:400;opacity:.9;margin-top:4px;line-height:1.3}
-#pwaHub .hub-btn-door{background:#00A0B4;box-shadow:0 4px 12px rgba(0,160,180,.45)}
-#pwaHub .hub-btn:active{transform:scale(0.98)}
+.home-standalone-msg{margin:20px 16px;padding:16px;background:#fff;border-radius:14px;font-size:12px;color:#555;line-height:1.5;text-align:center;box-shadow:0 2px 12px rgba(0,0,0,.06)}
+#doorAccessModal{display:none;position:fixed;inset:0;z-index:95000;align-items:center;justify-content:center;padding:20px}
+#doorAccessModal.active{display:flex}
+#doorAccessModal .door-access-backdrop{position:absolute;inset:0;background:rgba(30,40,55,.78);backdrop-filter:blur(2px)}
+#doorAccessModal .door-access-card{position:relative;z-index:1;background:#fff;border-radius:20px;padding:26px 20px 22px;max-width:360px;width:100%;box-shadow:0 24px 64px rgba(0,0,0,.35);text-align:center}
+#doorAccessModal .door-access-close{position:absolute;top:10px;right:12px;width:30px;height:30px;border:none;border-radius:50%;background:rgba(0,0,0,.08);font-size:20px;line-height:30px;color:#666;cursor:pointer}
+#doorAccessModal .door-access-close:active{background:rgba(0,0,0,.14)}
+#doorAccessModal .door-access-title{font-size:16px;font-weight:700;color:#1e3a5f;margin-bottom:10px}
+#doorAccessModal .hub-intro{font-size:12px;color:#555;line-height:1.45;margin-bottom:14px;text-align:center}
+#doorAccessModal .hub-note{margin-top:12px;font-size:10px;color:#999;line-height:1.45;text-align:center}
+#doorAccessModal .hub-btn{display:flex;width:100%;padding:12px 14px;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;margin-bottom:0;text-decoration:none;color:#fff;line-height:1.35;align-items:center}
+#doorAccessModal .hub-btn-layout{display:flex;align-items:center;gap:8px;width:100%}
+#doorAccessModal .hub-btn-icon{flex-shrink:0;width:52px;height:52px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.2);border-radius:12px;align-self:stretch;min-height:52px}
+#doorAccessModal .hub-btn-icon svg{width:30px;height:30px;fill:#fff;display:block}
+#doorAccessModal .hub-btn-text{flex:1;min-width:0;text-align:center;padding:0 2px}
+#doorAccessModal .hub-btn-main{display:block;font-size:15px;font-weight:700;line-height:1.3}
+#doorAccessModal .hub-btn-sub{display:block;font-size:11px;font-weight:400;opacity:.9;margin-top:4px;line-height:1.3}
+#doorAccessModal .hub-btn-door{background:#00A0B4;box-shadow:0 4px 12px rgba(0,160,180,.45)}
+#doorAccessModal .hub-btn:active{transform:scale(0.98)}
 .home-services{padding:4px 16px 16px}
 .svc-card{display:flex;margin-bottom:12px;border-radius:12px;overflow:hidden;background:#fff;box-shadow:0 4px 14px rgba(0,0,0,.08);min-height:108px}
 .svc-card.svc-link{cursor:pointer}
@@ -176,7 +183,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
       <div class="home-brand">Minka Backpackers</div>
     </header>
     <section class="home-hero">
-      <img src="https://static.wixstatic.com/media/16b791_4f523a2d15854fe6a37555343161f088~mv2.jpg" alt="Tours">
+      <img id="hubHeroImg" src="https://static.wixstatic.com/media/16b791_3c82c76a95c9462abc9ea4af24a67cb5~mv2.jpg" alt="Tours">
       <span class="home-hero-label" id="hubHeroLabel">Cuyabeno</span>
       <button type="button" class="home-pill home-pill-red" id="hubToursHero">Book Tours</button>
     </section>
@@ -184,20 +191,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
       <div class="home-backpacker-art"><img src="https://static.wixstatic.com/media/16b791_24235df3f3974f1d9712287154c039b0~mv2.png" alt=""></div>
       <div class="home-backpacker-main"><span id="hubBackpackerLabel">Backpacker</span><svg viewBox="0 0 24 24"><path d="M10 6V4h4v2h3v2h-1l-1 11H7L6 8H5V6h5zm2-2h0V4h-2v2h2z"/></svg></div>
     </button>
-    <section class="home-door-panel">
-      <p class="hub-intro" id="hubIntro">Escanea el QR en la puerta de entrada del hotel.</p>
-      <button type="button" class="hub-btn hub-btn-door" id="hubBtnDoor">
-        <span class="hub-btn-layout">
-          <span class="hub-btn-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 4h4v2H6v2H4V4zm10 0h6v6h-2V6h-4V4zM4 14h2v2h2v2H4v-4zm16 0v4h-4v-2h2v-2h2zM9 9h2v2H9V9zm4 0h2v2h-2V9zm-4 4h2v2H9v-2zm4 0h2v2h-2v-2zm4-8h2v2h-2V5zm0 4h2v2h-2V9zm-4 4h2v2h-2v-2zm4 0h2v2h-2v-2zm0 4h2v2h-2v-2z"/></svg></span>
-          <span class="hub-btn-text"><span class="hub-btn-main">Abrir puerta</span><span class="hub-btn-sub">Escanear QR</span></span>
-          <span class="hub-btn-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M19 19V5H5v14h14zm0-16c1.1 0 2 .9 2 2v14c0 1.1-.9 2-2 2H5c-1.1 0-2-.9-2-2V5c0-1.1.9-2 2-2h14zM11 16h2v2h-2v-2z"/></svg></span>
-        </span>
-      </button>
-      <p class="hub-note" id="hubNote">No olvides dar permisos de acceso a la cámara.</p>
-    </section>
+    <p class="home-standalone-msg" id="hubStandaloneMsg" style="display:none"></p>
     <div class="home-services">
       <article class="svc-card svc-link" id="hubTaxiCard" role="button" tabindex="0">
-        <div class="svc-img" style="background-image:url('https://static.wixstatic.com/media/16b791_cdf4d722254546ca95b5315be5c9ce3e~mv2.jpg')"><span>Taxi</span></div>
+        <div class="svc-img" id="hubTaxiImg" style="background-image:url('https://static.wixstatic.com/media/16b791_8bac2169d7e6456bab5376f002019523~mv2.jpg')"><span>Taxi</span></div>
         <div class="svc-body">
           <h3 id="hubTaxiTitle">Taxi Service</h3>
           <p id="hubTaxiSub">Reserva con 40 minutos de anticipación.</p>
@@ -205,7 +202,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
         </div>
       </article>
       <article class="svc-card svc-static" aria-disabled="true">
-        <div class="svc-img" style="background-image:url('https://static.wixstatic.com/media/16b791_313a210ae33b4d29914a7cb3556419fe~mv2.png');background-size:contain;background-color:#eef2ff"><span id="hubCarLabel">Rental Car</span></div>
+        <div class="svc-img" id="hubCarImg" style="background-image:url('https://static.wixstatic.com/media/16b791_7b6d647094454128b1eccba32af1a4fd~mv2.jpg')"><span id="hubCarLabel">Rental Car</span></div>
         <div class="svc-body">
           <h3 id="hubCarTitle">Rental Car</h3>
           <p id="hubCarSub">Reserva con un día de anticipación.</p>
@@ -213,7 +210,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
         </div>
       </article>
       <article class="svc-card svc-static" aria-disabled="true">
-        <div class="svc-img" style="background-image:url('https://static.wixstatic.com/media/16b791_bc5ee8f8d8fe4e8d80c935db3aafd599~mv2.png');background-size:cover"><span id="hubSpanLabel">Spanish</span></div>
+        <div class="svc-img" id="hubSpanImg" style="background-image:url('https://static.wixstatic.com/media/16b791_118629ea305d420bba89aace5a2c6b00~mv2.jpg')"><span id="hubSpanLabel">Spanish</span></div>
         <div class="svc-body">
           <h3 id="hubSpanTitle">Spanish Lessons</h3>
           <p id="hubSpanSub">Reserva con un día de anticipación.</p>
@@ -233,6 +230,22 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 <button id="btnWeb" aria-label="Abrir web Minka" type="button"><img src="https://static.wixstatic.com/media/16b791_bc5ee8f8d8fe4e8d80c935db3aafd599~mv2.png" alt="Minka"></button>
 <div id="doorFabHint" aria-live="polite"></div>
 <button id="btnDoor" aria-label="Apertura de puerta"><svg viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zM12 17c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zM9 8V6c0-1.66 1.34-3 3-3s3 1.34 3 3v2H9z"/></svg></button>
+<div id="doorAccessModal" class="door-access-modal" aria-hidden="true" role="dialog" aria-labelledby="doorAccessTitle">
+  <div class="door-access-backdrop" id="doorAccessBackdrop"></div>
+  <div class="door-access-card" id="doorAccessCard">
+    <button type="button" class="door-access-close" id="doorAccessClose" aria-label="Cerrar">&times;</button>
+    <div class="door-access-title" id="doorAccessTitle">Apertura de puerta</div>
+    <p class="hub-intro" id="hubIntro">Escanea el QR en la puerta de entrada del hotel.</p>
+    <button type="button" class="hub-btn hub-btn-door" id="hubBtnDoor">
+      <span class="hub-btn-layout">
+        <span class="hub-btn-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 4h4v2H6v2H4V4zm10 0h6v6h-2V6h-4V4zM4 14h2v2h2v2H4v-4zm16 0v4h-4v-2h2v-2h2zM9 9h2v2H9V9zm4 0h2v2h-2V9zm-4 4h2v2H9v-2zm4 0h2v2h-2v-2zm4-8h2v2h-2V5zm0 4h2v2h-2V9zm-4 4h2v2h-2v-2zm4 0h2v2h-2v-2zm0 4h2v2h-2v-2z"/></svg></span>
+        <span class="hub-btn-text"><span class="hub-btn-main">Abrir puerta</span><span class="hub-btn-sub">Escanear QR</span></span>
+        <span class="hub-btn-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M19 19V5H5v14h14zm0-16c1.1 0 2 .9 2 2v14c0 1.1-.9 2-2 2H5c-1.1 0-2-.9-2-2V5c0-1.1.9-2 2-2h14zM11 16h2v2h-2v-2z"/></svg></span>
+      </span>
+    </button>
+    <p class="hub-note" id="hubNote">No olvides dar permisos de acceso a la cámara.</p>
+  </div>
+</div>
 <!-- Overlay apertura puerta -->
 <div id="doorOverlay">
   <div id="doorLoading">
@@ -261,6 +274,17 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 (function(){
   var API_URL='https://www.minkahostel.com/_functions/doorAccess';
   var IMG_BP='https://static.wixstatic.com/media/16b791_24235df3f3974f1d9712287154c039b0~mv2.png';
+  var IMG_HERO_TOURS='https://static.wixstatic.com/media/16b791_3c82c76a95c9462abc9ea4af24a67cb5~mv2.jpg';
+  var IMG_SVC_TAXI='https://static.wixstatic.com/media/16b791_8bac2169d7e6456bab5376f002019523~mv2.jpg';
+  var IMG_SVC_CAR='https://static.wixstatic.com/media/16b791_7b6d647094454128b1eccba32af1a4fd~mv2.jpg';
+  var IMG_SVC_SPANISH='https://static.wixstatic.com/media/16b791_118629ea305d420bba89aace5a2c6b00~mv2.jpg';
+  function applyHubImages(){
+    var hi=document.getElementById('hubHeroImg');if(hi)hi.src=IMG_HERO_TOURS;
+    function bg(id,url){var el=document.getElementById(id);if(el)el.style.backgroundImage="url('"+url+"')";}
+    bg('hubTaxiImg',IMG_SVC_TAXI);
+    bg('hubCarImg',IMG_SVC_CAR);
+    bg('hubSpanImg',IMG_SVC_SPANISH);
+  }
   var WIX_ORIGIN='https://www.minkahostel.com';
   var URL_TOURS='https://www.minkahostel.com/tours';
   var URL_TAXI='https://www.minkahostel.com/taxi';
@@ -398,6 +422,29 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
     }
   }
   var doorFabHintTimer=null;
+  function closeDoorAccessModal(){
+    var m=document.getElementById('doorAccessModal');
+    if(!m)return;
+    m.classList.remove('active');
+    m.setAttribute('aria-hidden','true');
+  }
+  function openDoorAccessModal(){
+    if(!token||isAdminToken)return;
+    applyGuestHubLang();
+    var m=document.getElementById('doorAccessModal');
+    m.classList.add('active');
+    m.setAttribute('aria-hidden','false');
+  }
+  function startDoorFlowFromModal(){
+    closeDoorAccessModal();
+    doorFlow.start();
+  }
+  function bindDoorAccessModal(){
+    var cl=document.getElementById('doorAccessClose');
+    var bd=document.getElementById('doorAccessBackdrop');
+    if(cl&&!cl.dataset.bound){cl.dataset.bound='1';cl.onclick=closeDoorAccessModal;}
+    if(bd&&!bd.dataset.bound){bd.dataset.bound='1';bd.onclick=closeDoorAccessModal;}
+  }
   function playDoorFabFlyAnimation(fromRect){
     if(isAdminToken)return;
     var fab=document.getElementById('btnDoor');
@@ -453,8 +500,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
     getToken:function(){return token;},
     isAdmin:function(){return isAdminToken;},
     onOpenWeb:function(path){openWebInFrame(path);},
-    onDoorOverlayClosed:function(meta){playDoorFabFlyAnimation(meta&&meta.fromRect);}
+    onDoorOverlayClosed:function(meta){
+      closeDoorAccessModal();
+      if(meta&&meta.hintFab)playDoorFabFlyAnimation(meta&&meta.fromRect);
+    }
   });
+  bindDoorAccessModal();
   function styleAdminDoorButtons(){
     var btnDoor=document.getElementById('btnDoor');
     btnDoor.style.display='flex';
@@ -499,6 +550,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
     if(sl)sl.innerHTML=es?'<li>Clases personalizadas</li><li>Profesores nativos</li><li>11 USD / hora</li>':'<li>Personalized classes</li><li>Native teachers</li><li>11 USD / hour</li>';
     setText('hubCarLabel',es?'Renta':'Rental');
     setText('hubSpanLabel',es?'Español':'Spanish');
+    setText('doorAccessTitle',es?'Apertura de puerta':'Door access');
     var ib=document.querySelector('#installBanner .ib-text');
     if(ib){
       ib.innerHTML=es?'<strong>Instalar acceso directo</strong><span>Toca para añadir Minka a tu pantalla de inicio</span>':'<strong>Install shortcut</strong><span>Tap to add Minka to your home screen</span>';
@@ -514,8 +566,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
     hub.classList.remove('hidden','hub-minimal');
     document.getElementById('btnDoor').style.display='flex';
     document.getElementById('btnWeb').style.display=isAdminToken?'flex':'none';
-    document.getElementById('hubBtnDoor').onclick=function(){doorFlow.start();};
+    document.getElementById('hubBtnDoor').onclick=function(){startDoorFlowFromModal();};
     setupGuestHubLinks();
+    applyHubImages();
     applyGuestHubLang();
     updateInstallBannerVisibility();
   }
@@ -605,11 +658,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
   } else {
     document.getElementById('pwaHub').classList.remove('hidden');
     document.getElementById('pwaHub').classList.add('hub-minimal');
-    var hi=document.getElementById('hubIntro');
-    hi.dataset.lockLang='1';
-    hi.innerHTML='Abre el enlace de acceso de tu correo de reserva para usar la puerta.<br><span class="en">Open the access link from your booking email.</span>';
-    document.getElementById('hubNote').style.display='none';
-    document.getElementById('hubBtnDoor').style.display='none';
+    var sm=document.getElementById('hubStandaloneMsg');
+    if(sm){
+      sm.style.display='block';
+      sm.innerHTML='Abre el enlace de acceso de tu correo de reserva para usar la puerta.<br><span style="font-size:11px;color:#999">Open the access link from your booking email.</span>';
+    }
   }
 
   setupInstallPrompt();
@@ -646,7 +699,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
     },400);
   }
 
-  btnDoor.onclick=function(){doorFlow.start();};
+  btnDoor.onclick=function(){
+    if(isAdminToken)doorFlow.start();
+    else openDoorAccessModal();
+  };
 
   // Prevenir back
   history.pushState({p:1},'','');
