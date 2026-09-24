@@ -6,11 +6,41 @@ window.MinkaDoorFlow = function(cfg) {
   var IMG_BP = cfg.imgBp;
   var getToken = cfg.getToken || function() { return ''; };
   var isAdmin = cfg.isAdmin || function() { return false; };
+  var getDeviceId = cfg.getDeviceId || function() { return ''; };
 
   var qrScanner = null;
   var scanLock = false;
   var LANG_KEY = 'minka_lang';
   var _lastResponseContext = null;
+  var _pendingDoorQr = null;
+
+  /** Llave física: texto plano o URL PWA con ?doorQr= / ?qr= (ignora el resto de la URL). */
+  function extractDoorQrFromScan(raw) {
+    if (!raw) return '';
+    var s = String(raw).trim();
+    if (/^https?:\/\//i.test(s) || /^www\./i.test(s)) {
+      try {
+        var href = s.indexOf('://') >= 0 ? s : 'https://' + s;
+        var u = new URL(href);
+        var q = u.searchParams.get('doorQr') || u.searchParams.get('qr') || '';
+        if (q) return decodeURIComponent(q).trim();
+      } catch (e) {}
+      var qIdx = s.indexOf('?');
+      if (qIdx >= 0) {
+        var parts = s.substring(qIdx + 1).split('&');
+        for (var i = 0; i < parts.length; i++) {
+          var kv = parts[i].split('=');
+          if (kv[0] === 'doorQr' || kv[0] === 'qr') {
+            try { return decodeURIComponent(kv[1] || '').trim(); } catch (e2) { return (kv[1] || '').trim(); }
+          }
+        }
+      }
+      return '';
+    }
+    return s;
+  }
+
+  window.MinkaDoorQr = { extract: extractDoorQrFromScan };
 
   function getLang() {
     try {
@@ -25,6 +55,7 @@ window.MinkaDoorFlow = function(cfg) {
     try { sessionStorage.setItem(LANG_KEY, lang); } catch (e) {}
     updateLangSwitchUI();
     try { window.dispatchEvent(new CustomEvent('minkaLangChange')); } catch (e) {}
+    updateQrHintUI();
     if (_lastResponseContext) {
       applyResponse(_lastResponseContext.data, _lastResponseContext.confirmBalance);
     }
@@ -59,7 +90,8 @@ window.MinkaDoorFlow = function(cfg) {
       statusEl: document.getElementById('doorStatus'),
       card: document.getElementById('doorCard'),
       qrStage: document.getElementById('doorQrStage'),
-      qrHint: document.getElementById('doorQrHint'),
+      qrHintMain: document.getElementById('doorQrHintMain'),
+      qrHintSub: document.getElementById('doorQrHintSub'),
       iconEl: document.getElementById('doorIcon'),
       titleEl: document.getElementById('doorTitle'),
       msgEl: document.getElementById('doorMsg'),
@@ -92,6 +124,7 @@ window.MinkaDoorFlow = function(cfg) {
   }
 
   function closeOverlay(opts) {
+    _pendingDoorQr = null;
     var e = el();
     var cardVisible = e.card && e.card.style.display === 'block';
     var fromRect = cardVisible ? e.card.getBoundingClientRect() : null;
@@ -147,9 +180,35 @@ window.MinkaDoorFlow = function(cfg) {
       : 'Don\'t forget to smile at the camera; for your security, hotel access is monitored 24/7.';
   }
 
+  var QR_ICON_SVG = '<svg viewBox="0 0 24 24"><path d="M4 4h4v2H6v2H4V4zm10 0h6v6h-2V6h-4V4zM4 14h2v2h2v2H4v-4zm16 0v4h-4v-2h2v-2h2zM9 9h2v2H9V9zm4 0h2v2h-2V9zm-4 4h2v2H9v-2zm4 0h2v2h-2v-2zm4-8h2v2h-2V5zm0 4h2v2h-2V9zm-4 4h2v2h-2v-2zm4 0h2v2h-2v-2zm0 4h2v2h-2v-2z"/></svg>';
+
+  function updateQrHintUI() {
+    var e = el();
+    if (!e.qrHintMain) return;
+    var es = isEs();
+    e.qrHintMain.textContent = es
+      ? 'Escanea el código del hotel que está debajo del timbre, en la puerta de entrada.'
+      : 'Scan the hotel code below the doorbell at the entrance door.';
+    if (e.qrHintSub) {
+      e.qrHintSub.textContent = es
+        ? 'Puede ser un enlace a esta app; usamos solo el código de la puerta, no tu enlace personal.'
+        : 'It may be a link to this app; we only use the door code, not your personal link.';
+    }
+  }
+
+  function doorOpenButtonHtml(es, btnId) {
+    return '<button type="button" class="d-btn d-btn-door-style" id="' + btnId + '">' +
+      '<span class="hub-btn-layout">' +
+      '<span class="hub-btn-icon" aria-hidden="true">' + QR_ICON_SVG + '</span>' +
+      '<span class="hub-btn-text"><span class="hub-btn-main">' + (es ? 'Abrir puerta' : 'Open door') + '</span>' +
+      '<span class="hub-btn-sub">' + (es ? 'Escanear QR' : 'Scan QR') + '</span></span></span></button>';
+  }
+
   function apiPost(extra, cb) {
     var e = el();
     var payload = { token: getToken() };
+    var did = getDeviceId();
+    if (did) payload.deviceId = did;
     if (extra) {
       for (var k in extra) payload[k] = extra[k];
     }
@@ -173,9 +232,28 @@ window.MinkaDoorFlow = function(cfg) {
       });
   }
 
+  function applySuggestedToken(data) {
+    if (data && data.suggestedToken && cfg.onTokenRefresh) {
+      cfg.onTokenRefresh(data.suggestedToken);
+    }
+  }
+
   function handleResponse(data, confirmBalanceRetry) {
+    applySuggestedToken(data);
     _lastResponseContext = { data: data, confirmBalance: confirmBalanceRetry };
     applyResponse(data, confirmBalanceRetry);
+  }
+
+  function maybeRevokeGuestAccess(data) {
+    if (data && data.accessRevoked && cfg.onAccessRevoked) {
+      cfg.onAccessRevoked();
+    }
+  }
+
+  function expiredAccessHtml(es) {
+    return es
+      ? 'No hay una estadía activa para este acceso en la fecha de hoy. Si necesitas ayuda, contacta recepción o WhatsApp.'
+      : 'There is no active stay for this access on today\'s date. Contact reception or WhatsApp if you need help.';
   }
 
   function applyResponse(data, confirmBalanceRetry) {
@@ -219,8 +297,29 @@ window.MinkaDoorFlow = function(cfg) {
     }
 
     var err = data.error;
+    if (err === 'ACCESS_EXPIRED') {
+      maybeRevokeGuestAccess(data);
+      showCard('warning', es ? 'Acceso caducado' : 'Access expired',
+        data.message && data.message.indexOf('|') < 0 ? data.message : expiredAccessHtml(es),
+        '', '<button type="button" class="d-btn" id="_doorExpOk">' + (es ? 'Entendido' : 'OK') + '</button>', guestUi);
+      var expOk = document.getElementById('_doorExpOk');
+      if (expOk) expOk.onclick = function() { closeOverlay(); };
+      return;
+    }
     if (err === 'NO_ACTIVE_RESERVATION') {
-      showCard('info', es ? 'Sin reserva activa' : 'No active reservation', es ? 'No se encontró una reserva activa para hoy.' : 'No active reservation found for today.', '', '', guestUi);
+      maybeRevokeGuestAccess({ accessRevoked: true });
+      showCard('warning', es ? 'Acceso caducado' : 'Access expired', expiredAccessHtml(es),
+        '', '<button type="button" class="d-btn" id="_doorNaOk">' + (es ? 'Entendido' : 'OK') + '</button>', guestUi);
+      var naOk = document.getElementById('_doorNaOk');
+      if (naOk) naOk.onclick = function() { closeOverlay(); };
+      return;
+    }
+    if (err === 'STAY_NOT_STARTED') {
+      showCard('info', es ? 'Estadía por comenzar' : 'Stay not started yet',
+        data.message || (es
+          ? 'Tu reserva aún no está en curso. El acceso a la puerta se habilitará el día de tu check-in.'
+          : 'Your booking is not active yet. Door access will be enabled on your check-in day.'),
+        '', '', guestUi);
       return;
     }
     if (err === 'CHECKIN_REQUIRED') {
@@ -230,15 +329,14 @@ window.MinkaDoorFlow = function(cfg) {
     }
     if (err === 'BALANCE_WARNING') {
       var bal = data.balance || 0;
-      var bHtml = '<img src="' + IMG_BP + '" style="width:60px;margin:4px auto 8px;display:block">';
-      bHtml += '<div style="font-size:11px;color:#555;line-height:1.6;margin-bottom:10px">' + data.message + '</div>';
+      var bHtml = '<div style="font-size:11px;color:#555;line-height:1.6;margin-bottom:10px">' + data.message + '</div>';
       if (bal > 0) {
         bHtml += '<table class="balance-table"><tr><td style="color:#555">' + (es ? 'Concepto' : 'Item') + '</td><td style="text-align:right;font-weight:600">' + (es ? 'Saldo' : 'Balance') + '</td></tr>';
         bHtml += '<tr><td style="color:#555">' + (es ? 'Hospedaje' : 'Accommodation') + '</td><td style="text-align:right;font-weight:600">$' + bal.toFixed(2) + '</td></tr>';
         bHtml += '<tr class="total"><td>Total</td><td style="text-align:right;font-weight:700">$' + bal.toFixed(2) + '</td></tr></table>';
       }
       showCard('warning', es ? 'Saldo pendiente' : 'Pending balance', '', bHtml,
-        '<button class="d-btn" id="_bwo">' + (es ? 'Continuar' : 'Continue') + '</button>', guestUi);
+        doorOpenButtonHtml(es, '_bwo'), guestUi);
       document.getElementById('_bwo').onclick = function() {
         runPreflight(true, confirmBalanceRetry);
       };
@@ -252,8 +350,21 @@ window.MinkaDoorFlow = function(cfg) {
       return;
     }
     if (err === 'DC_NOT_STARTED') { showCard('info', es ? 'Horario no disponible' : 'Schedule not available', data.message, '', '', guestUi); return; }
-    if (err === 'DC_ENDED' || err === 'ENDED') { showCard('success', es ? 'Finalizado' : 'Ended', data.message, '', '', guestUi); return; }
-    if (err === 'CANCELLED' || err === 'DISABLED') { showCard('error', es ? 'Acceso no autorizado' : 'Access denied', data.message, '', '', guestUi); return; }
+    if (err === 'DC_ENDED' || err === 'ENDED') {
+      maybeRevokeGuestAccess(data.accessRevoked ? data : { accessRevoked: true });
+      showCard('warning', es ? 'Acceso caducado' : 'Access expired',
+        err === 'ENDED' ? expiredAccessHtml(es) : (data.message || expiredAccessHtml(es)),
+        '', '<button type="button" class="d-btn" id="_doorEndOk">' + (es ? 'Entendido' : 'OK') + '</button>', guestUi);
+      var endOk = document.getElementById('_doorEndOk');
+      if (endOk) endOk.onclick = function() { closeOverlay(); };
+      return;
+    }
+    if (err === 'CANCELLED') {
+      maybeRevokeGuestAccess({ accessRevoked: true });
+      showCard('warning', es ? 'Acceso caducado' : 'Access expired', data.message || expiredAccessHtml(es), '', '', guestUi);
+      return;
+    }
+    if (err === 'DISABLED') { showCard('error', es ? 'Acceso no autorizado' : 'Access denied', data.message, '', '', guestUi); return; }
     if (err === 'DOOR_FAIL') {
       var who = data.name || '';
       showCard('error', es ? 'No se pudo abrir' : 'Could not open',
@@ -290,8 +401,24 @@ window.MinkaDoorFlow = function(cfg) {
       return;
     }
     if (err === 'NOT_FOUND' || err === 'NO_UUID') {
-      showCard('error', es ? 'Reserva no encontrada' : 'Reservation not found',
-        es ? 'No pudimos encontrar tu reserva. Verifica el enlace o contáctanos.' : 'We could not find your reservation. Check your link or contact us.', '', '', guestUi);
+      maybeRevokeGuestAccess({ accessRevoked: true });
+      showCard('warning', es ? 'Acceso caducado' : 'Access expired', expiredAccessHtml(es), '', '', guestUi);
+      return;
+    }
+    if (err === 'DEVICE_BOUND') {
+      if (cfg.onDeviceBound) cfg.onDeviceBound();
+      showCard('warning', es ? 'Acceso en otro dispositivo' : 'Access on another device',
+        data.message || (es
+          ? 'Este enlace ya está vinculado a otro teléfono. Usa el dispositivo donde lo abriste la primera vez o pide ayuda en recepción.'
+          : 'This link is already linked to another phone. Use the device where you first opened it, or ask at reception.'),
+        '', '<button type="button" class="d-btn" id="_doorBoundOk">' + (es ? 'Entendido' : 'OK') + '</button>', guestUi);
+      var boundOk = document.getElementById('_doorBoundOk');
+      if (boundOk) boundOk.onclick = function() { closeOverlay(); };
+      return;
+    }
+    if (err === 'DEVICE_REQUIRED') {
+      showCard('warning', es ? 'Dispositivo no identificado' : 'Device not identified',
+        data.message || (es ? 'Actualiza la PWA e intenta de nuevo.' : 'Update the PWA and try again.'), '', '', guestUi);
       return;
     }
     showCard('error', es ? 'Acceso no autorizado' : 'Access denied', data.message || '', '', '', guestUi);
@@ -320,7 +447,14 @@ window.MinkaDoorFlow = function(cfg) {
 
   function afterPreflightOk(data, confirmBalance) {
     if (isAdmin()) {
-      openDoorRequest({ confirmBalance: !!confirmBalance });
+      openDoorRequest({ confirmBalance: !!confirmBalance, doorQr: _pendingDoorQr || undefined });
+      _pendingDoorQr = null;
+      return;
+    }
+    if (_pendingDoorQr) {
+      var key = _pendingDoorQr;
+      _pendingDoorQr = null;
+      openDoorRequest({ doorQr: key, confirmBalance: !!confirmBalance });
       return;
     }
     if (data.firstAccess) {
@@ -342,9 +476,7 @@ window.MinkaDoorFlow = function(cfg) {
     e.card.style.display = 'none';
     e.loading.style.display = 'none';
     e.qrStage.style.display = 'block';
-    e.qrHint.textContent = isEs()
-      ? 'Apunta al QR de la puerta (código del hotel, no tu enlace de reserva)'
-      : 'Point at the door QR (hotel code, not your booking link)';
+    updateQrHintUI();
 
     qrScanner = new Html5Qrcode('doorQrReader');
     scanLock = false;
@@ -354,10 +486,19 @@ window.MinkaDoorFlow = function(cfg) {
       function(decoded) {
         if (scanLock) return;
         scanLock = true;
+        var doorKey = extractDoorQrFromScan(decoded);
+        if (!doorKey) {
+          scanLock = false;
+          showCard('warning', isEs() ? 'QR incorrecto' : 'Wrong QR',
+            isEs() ? 'Ese código no es el de la puerta del hotel. Usa el QR debajo del timbre.' : 'That is not the hotel entrance code. Use the QR below the doorbell.',
+            '', '<button class="d-btn" id="_retryQrBad">' + (isEs() ? 'Escanear de nuevo' : 'Scan again') + '</button>', !isAdmin());
+          document.getElementById('_retryQrBad').onclick = function() { startScanner(confirmBalance); };
+          return;
+        }
         stopScanner();
         e.loading.style.display = 'block';
         e.statusEl.textContent = isEs() ? 'Abriendo puerta...' : 'Opening door...';
-        openDoorRequest({ doorQr: decoded, confirmBalance: !!confirmBalance });
+        openDoorRequest({ doorQr: doorKey, confirmBalance: !!confirmBalance });
       },
       function() {}
     ).catch(function(err) {
@@ -377,6 +518,7 @@ window.MinkaDoorFlow = function(cfg) {
   }
 
   function start() {
+    _pendingDoorQr = null;
     if (!getToken()) {
       var esNa = isEs();
       showCard('warning', esNa ? 'Sin acceso' : 'No access', esNa ? 'Abre la app desde el enlace de tu correo de reserva.' : 'Open the app from your booking email link.', '', '', !isAdmin());
@@ -384,6 +526,25 @@ window.MinkaDoorFlow = function(cfg) {
       return;
     }
     runPreflight(false);
+  }
+
+  /** Escaneo externo del sticker: abre puerta con llave física + token del dispositivo (sin cámara). */
+  function openFromDoorQr(doorQrRaw, confirmBalance) {
+    var key = extractDoorQrFromScan(doorQrRaw);
+    if (!key) return false;
+    if (!getToken()) return false;
+    if (isAdmin()) {
+      var eAd = el();
+      eAd.overlay.classList.add('active');
+      resetOverlay();
+      var esAd = isEs();
+      eAd.statusEl.textContent = esAd ? 'Abriendo puerta...' : 'Opening door...';
+      openDoorRequest({ doorQr: key, confirmBalance: !!confirmBalance });
+      return true;
+    }
+    _pendingDoorQr = key;
+    runPreflight(!!confirmBalance);
+    return true;
   }
 
   var e0 = el();
@@ -397,5 +558,5 @@ window.MinkaDoorFlow = function(cfg) {
   if (langEnBtn) langEnBtn.onclick = function() { setLang('en'); };
   updateLangSwitchUI();
 
-  return { start: start, runPreflight: runPreflight };
+  return { start: start, runPreflight: runPreflight, openFromDoorQr: openFromDoorQr, extractDoorQrFromScan: extractDoorQrFromScan };
 };

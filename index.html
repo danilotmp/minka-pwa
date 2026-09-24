@@ -79,6 +79,14 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 #doorAccessModal .hub-btn-sub{display:block;font-size:11px;font-weight:400;opacity:.9;margin-top:4px;line-height:1.3}
 #doorAccessModal .hub-btn-door{background:#00A0B4;box-shadow:0 4px 12px rgba(0,160,180,.45)}
 #doorAccessModal .hub-btn:active{transform:scale(0.98)}
+#guestOnlyModal{display:none;position:fixed;inset:0;z-index:96000;align-items:center;justify-content:center;padding:20px}
+#guestOnlyModal.active{display:flex}
+#guestOnlyModal .door-access-backdrop{position:absolute;inset:0;background:rgba(30,40,55,.82);backdrop-filter:blur(2px)}
+#guestOnlyModal .door-access-card{position:relative;z-index:1;background:#fff;border-radius:20px;padding:26px 20px 22px;max-width:360px;width:100%;box-shadow:0 24px 64px rgba(0,0,0,.35);text-align:center}
+#guestOnlyModal .door-access-title{font-size:16px;font-weight:700;color:#1e3a5f;margin-bottom:12px}
+#guestOnlyModal .guest-only-msg{font-size:13px;color:#555;line-height:1.55;margin-bottom:18px;text-align:left}
+#guestOnlyModal .guest-only-msg a{color:#00A0B4;font-weight:600}
+#guestOnlyModal .guest-only-close{width:100%;padding:14px;background:#1e293b;color:#fff;border:none;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer}
 .home-services{padding:4px 16px 12px;flex:1 0 auto}
 .svc-card{display:flex;margin-bottom:12px;border-radius:12px;overflow:hidden;background:#fff;box-shadow:0 4px 14px rgba(0,0,0,.08);min-height:108px}
 .svc-card.svc-link{cursor:pointer}
@@ -90,7 +98,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .svc-body h3{font-size:14px;color:#1a3a5c;margin-bottom:4px}
 .svc-body p{font-size:10px;color:#666;line-height:1.4;margin-bottom:6px}
 .svc-body ul{margin:0;padding-left:14px;font-size:10px;color:#555;line-height:1.45}
-.home-footer{padding:18px 16px max(92px,calc(20px + env(safe-area-inset-bottom)));text-align:center;font-size:10px;line-height:1.5;background:#1e293b;color:#cbd5e1;margin-top:auto;flex-shrink:0}
+.home-footer{padding:16px 16px max(58px,calc(10px + env(safe-area-inset-bottom)));text-align:center;font-size:10px;line-height:1.5;background:#1e293b;color:#cbd5e1;margin-top:auto;flex-shrink:0}
 .home-footer a{color:#7dd3fc;text-decoration:none}
 .home-footer .social{display:flex;justify-content:center;gap:10px;margin-bottom:10px}
 .home-footer .social span{width:32px;height:32px;border-radius:50%;background:#334155;display:inline-flex;align-items:center;justify-content:center;font-size:14px}
@@ -108,9 +116,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 #btnWeb img{width:100%;height:100%;object-fit:cover;display:block}
 #btnCloseWeb{display:none;position:fixed;top:12px;left:12px;z-index:100001;padding:8px 14px;border:none;border-radius:20px;background:rgba(255,255,255,.92);font-size:12px;font-weight:600;color:#223242;box-shadow:0 2px 8px rgba(0,0,0,.2);cursor:pointer}
 /* Botón flotante candado — alineado arriba-izquierda del WhatsApp de Wix */
-#btnDoor{display:none;position:fixed;bottom:100px;right:27px;z-index:99999;width:44px;height:44px;border-radius:50%;background:#00A0B4;border:none;box-shadow:0 4px 12px rgba(0,160,180,.5);cursor:pointer;align-items:center;justify-content:center}
+#btnDoor{display:none;position:fixed;bottom:96px;right:27px;z-index:99999;width:44px;height:44px;border-radius:50%;background:#00A0B4;border:none;box-shadow:0 4px 12px rgba(0,160,180,.5);cursor:pointer;align-items:center;justify-content:center}
 #btnDoor svg{width:22px;height:22px;fill:#fff}
 #btnDoor:active{transform:scale(0.92)}
+#btnWhatsApp{display:none;position:fixed;bottom:34px;right:22px;z-index:99997;width:52px;height:52px;border-radius:50%;background:#25D366;border:3px solid #fff;box-shadow:0 4px 14px rgba(0,0,0,.28);cursor:pointer;align-items:center;justify-content:center;padding:0}
+#btnWhatsApp svg{width:28px;height:28px;fill:#fff}
+#btnWhatsApp:active{transform:scale(0.94)}
 #btnDoor.fab-pulse{animation:fabPulse 1s ease 2}
 @keyframes fabPulse{0%,100%{box-shadow:0 4px 12px rgba(0,160,180,.5);transform:scale(1)}50%{box-shadow:0 0 0 14px rgba(0,160,180,.25),0 6px 20px rgba(0,160,180,.65);transform:scale(1.08)}}
 .door-fab-fly{position:fixed;left:0;top:0;z-index:200001;pointer-events:none;will-change:transform,opacity}
@@ -140,6 +151,14 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .door-card .d-msg{font-size:11px;color:#555;line-height:1.6;margin-bottom:12px}
 .door-card .d-btn{display:block;width:100%;padding:14px;color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;margin-top:10px;text-decoration:none;text-align:center;background:#7cb342;box-shadow:0 3px 8px rgba(124,179,66,.4)}
 .door-card .d-btn:active{background:#689f38}
+.door-card .d-btn-door-style{display:flex;width:100%;padding:12px 14px;border:none;border-radius:12px;font-weight:700;cursor:pointer;margin-top:10px;color:#fff;background:#7cb342;box-shadow:0 3px 8px rgba(124,179,66,.4);align-items:center;line-height:1.35}
+.door-card .d-btn-door-style:active{background:#689f38}
+.door-card .d-btn-door-style .hub-btn-layout{display:flex;align-items:center;gap:8px;width:100%}
+.door-card .d-btn-door-style .hub-btn-icon{flex-shrink:0;width:48px;height:48px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.22);border-radius:10px}
+.door-card .d-btn-door-style .hub-btn-icon svg{width:26px;height:26px;fill:#fff}
+.door-card .d-btn-door-style .hub-btn-text{flex:1;text-align:center;min-width:0}
+.door-card .d-btn-door-style .hub-btn-main{display:block;font-size:14px;font-weight:700}
+.door-card .d-btn-door-style .hub-btn-sub{display:block;font-size:10px;font-weight:400;opacity:.92;margin-top:3px}
 .door-card .d-extra{margin-top:12px}
 .door-lang-switch{display:none;justify-content:center;gap:6px;margin:0 0 8px;padding-top:2px}
 .d-security-foot{margin-top:12px;font-size:10px;color:#777;line-height:1.45;text-align:center}
@@ -152,8 +171,13 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .room-card .rc-cat{font-size:13px;font-weight:700;color:#1e3a5f;text-transform:uppercase;margin-bottom:4px}
 .room-card .rc-detail{font-size:11px;color:#555;line-height:1.6}
 .room-card .rc-key{font-size:12px;color:#333;margin-top:4px}
-#doorQrStage{display:none;width:100%;max-width:340px;text-align:center}
-#doorQrStage .qr-hint{color:rgba(255,255,255,.85);font-size:12px;margin-bottom:10px;line-height:1.45}
+#doorQrStage{display:none;width:100%;max-width:360px;text-align:center;padding:0 4px}
+.qr-comic-hint{display:flex;align-items:flex-end;gap:6px;margin-bottom:14px;text-align:left;width:100%}
+.qr-comic-char{width:68px;height:auto;flex-shrink:0;filter:drop-shadow(0 2px 6px rgba(0,0,0,.35))}
+.qr-speech-bubble{position:relative;background:#fff;color:#1e3a5f;border-radius:18px;padding:13px 15px;box-shadow:0 6px 20px rgba(0,0,0,.28);flex:1;min-width:0}
+.qr-speech-bubble::after{content:'';position:absolute;left:-10px;bottom:18px;width:0;height:0;border-top:9px solid transparent;border-bottom:9px solid transparent;border-right:12px solid #fff;filter:drop-shadow(-2px 2px 2px rgba(0,0,0,.08))}
+.qr-speech-main{font-size:15px;font-weight:800;line-height:1.35;margin:0;letter-spacing:-.01em}
+.qr-speech-sub{font-size:11px;font-weight:500;color:#577083;margin:8px 0 0;line-height:1.35}
 #doorQrReader{width:100%;max-width:320px;margin:0 auto;border-radius:12px;overflow:hidden;background:#000}
 #doorQrReader video{border-radius:12px}
 </style>
@@ -235,6 +259,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 <button id="btnWeb" aria-label="Abrir web Minka" type="button"><img src="https://static.wixstatic.com/media/16b791_bc5ee8f8d8fe4e8d80c935db3aafd599~mv2.png" alt="Minka"></button>
 <div id="doorFabHint" aria-live="polite"></div>
 <button id="btnDoor" aria-label="Apertura de puerta"><svg viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zM12 17c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zM9 8V6c0-1.66 1.34-3 3-3s3 1.34 3 3v2H9z"/></svg></button>
+<button id="btnWhatsApp" type="button" aria-label="WhatsApp Minka"><svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.435 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg></button>
 <div id="doorAccessModal" class="door-access-modal" aria-hidden="true" role="dialog" aria-labelledby="doorAccessTitle">
   <div class="door-access-backdrop" id="doorAccessBackdrop"></div>
   <div class="door-access-card" id="doorAccessCard">
@@ -250,6 +275,14 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
     <p class="hub-note" id="hubNote">No olvides dar permisos de acceso a la cámara.</p>
   </div>
 </div>
+<div id="guestOnlyModal" aria-hidden="true" role="alertdialog" aria-labelledby="guestOnlyTitle">
+  <div class="door-access-backdrop" id="guestOnlyBackdrop"></div>
+  <div class="door-access-card">
+    <div class="door-access-title" id="guestOnlyTitle">Solo huéspedes</div>
+    <div class="guest-only-msg" id="guestOnlyMsg"></div>
+    <button type="button" class="guest-only-close" id="guestOnlyClose">Entendido</button>
+  </div>
+</div>
 <!-- Overlay apertura puerta -->
 <div id="doorOverlay">
   <div id="doorLoading">
@@ -257,7 +290,13 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
     <div class="door-loading" id="doorStatus">Verificando acceso...</div>
   </div>
   <div id="doorQrStage">
-    <div class="qr-hint" id="doorQrHint">Escanea el QR en la puerta del hotel</div>
+    <div class="qr-comic-hint" id="doorQrHintWrap">
+      <img class="qr-comic-char" src="https://static.wixstatic.com/media/16b791_24235df3f3974f1d9712287154c039b0~mv2.png" alt="">
+      <div class="qr-speech-bubble" id="doorQrHint">
+        <p class="qr-speech-main" id="doorQrHintMain"></p>
+        <p class="qr-speech-sub" id="doorQrHintSub"></p>
+      </div>
+    </div>
     <div id="doorQrReader"></div>
   </div>
   <div class="door-card" id="doorCard" style="display:none">
@@ -277,6 +316,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 <script>
 (function(){
   var API_URL='https://www.minkahostel.com/_functions/doorAccess';
+  /** URL base para imprimir el QR de la puerta: ?doorQr=CODIGO_DEL_CMS (sin token de huésped). */
+  var PWA_PUBLIC_URL='https://danilotmp.github.io/minka-pwa/';
   var IMG_BP='https://static.wixstatic.com/media/16b791_24235df3f3974f1d9712287154c039b0~mv2.png';
   var IMG_HERO_TOURS='https://static.wixstatic.com/media/16b791_3c82c76a95c9462abc9ea4af24a67cb5~mv2.jpg';
   var IMG_SVC_TAXI='https://static.wixstatic.com/media/16b791_8bac2169d7e6456bab5376f002019523~mv2.jpg';
@@ -293,6 +334,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
   var URL_TOURS='https://www.minkahostel.com/tours';
   var URL_TAXI='https://www.minkahostel.com/taxi';
   var URL_BACKPACKERS_PWA='';
+  var URL_WHATSAPP='https://wa.me/593968047059';
   var isStandalone=window.matchMedia('(display-mode: standalone)').matches||(window.navigator&&window.navigator.standalone);
   function openExternal(url){
     if(!url)return;
@@ -371,6 +413,24 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
     updateInstallBannerVisibility();
   }
 
+  function getOrCreateDeviceId(){
+    var k='minka_device_id';
+    try{
+      var id=localStorage.getItem(k);
+      if(id&&String(id).length>=12)return id;
+      if(window.crypto&&window.crypto.randomUUID){
+        id='md_'+window.crypto.randomUUID();
+      }else{
+        id='md_'+Date.now().toString(36)+Math.random().toString(36).slice(2,12);
+      }
+      localStorage.setItem(k,id);
+      return id;
+    }catch(e){
+      return 'md_'+Date.now();
+    }
+  }
+  var deviceId=getOrCreateDeviceId();
+
   function buildIframeSrc(isAdmin, tok){
     var base=isAdmin?WIX_ORIGIN+'/reservas-hospedaje':WIX_ORIGIN;
     if(!tok)return base;
@@ -382,6 +442,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
   var token=params.get('t')||localStorage.getItem('minka_token')||'';
   var openedFromEmailLink=!!params.get('t');
   if(params.get('t'))localStorage.setItem('minka_token',token);
+  var inboundDoorQr=params.get('doorQr')||params.get('qr')||'';
+  if(inboundDoorQr){try{inboundDoorQr=decodeURIComponent(inboundDoorQr.trim());}catch(eDr){inboundDoorQr=inboundDoorQr.trim();}}
 
   var decodedToken='';try{if(token&&token.indexOf('pwa1.')!==0)decodedToken=atob(token)}catch(e){}
   var isAdminToken=!!(token&&(token.indexOf('pwa1.')===0||decodedToken.indexOf('admin|')===0));
@@ -499,18 +561,144 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
     if(doorFabHintTimer)clearTimeout(doorFabHintTimer);
     doorFabHintTimer=setTimeout(function(){hint.classList.remove('show');},4500);
   }
+  function refreshGuestToken(newTok){
+    if(!newTok||isAdminToken)return;
+    token=newTok;
+    try{localStorage.setItem('minka_token',newTok);}catch(e){}
+    var bd=document.getElementById('btnDoor');if(bd)bd.style.display='flex';
+    var bwa=document.getElementById('btnWhatsApp');if(bwa&&!isAdminToken)bwa.style.display='flex';
+    var bw=document.getElementById('btnWeb');if(bw)bw.style.display='flex';
+  }
+  function revokeGuestTokenLocal(){
+    try{localStorage.removeItem('minka_token');}catch(e){}
+    token='';
+    document.getElementById('btnDoor').style.display='none';
+    var bwa=document.getElementById('btnWhatsApp');if(bwa)bwa.style.display='none';
+    document.getElementById('btnWeb').style.display='none';
+  }
+  function showAccessExpiredModal(){
+    var es=!window.MinkaPwaLang||window.MinkaPwaLang.isEs();
+    var m=document.getElementById('guestOnlyModal');
+    var tit=document.getElementById('guestOnlyTitle');
+    var msg=document.getElementById('guestOnlyMsg');
+    var btn=document.getElementById('guestOnlyClose');
+    if(tit)tit.textContent=es?'Acceso caducado':'Access expired';
+    if(msg){
+      msg.innerHTML=es
+        ?'Este enlace ya <b>caducó</b> o no es de tu estadía actual.<br><br>Usa el botón <b>Abrir puerta</b> del correo de tu reserva vigente. Si escaneaste el QR del hotel, abre primero ese enlace en tu teléfono.'
+        :'This link has <b>expired</b> or is not for your current stay.<br><br>Use the <b>Open door</b> button from your active booking email. If you scanned the hotel QR, open that link on your phone first.';
+    }
+    if(btn)btn.textContent=es?'Cerrar':'Close';
+    if(m){m.classList.add('active');m.setAttribute('aria-hidden','false');}
+  }
+  function showDeviceBoundModal(){
+    var es=!window.MinkaPwaLang||window.MinkaPwaLang.isEs();
+    var m=document.getElementById('guestOnlyModal');
+    var tit=document.getElementById('guestOnlyTitle');
+    var msg=document.getElementById('guestOnlyMsg');
+    var btn=document.getElementById('guestOnlyClose');
+    if(tit)tit.textContent=es?'Acceso en otro dispositivo':'Access on another device';
+    if(msg){
+      msg.innerHTML=es
+        ?'Este enlace de acceso ya se activó en <b>otro teléfono</b>. Por seguridad no se puede compartir.<br><br>Si cambiaste de celular, contacta <a href="'+URL_WHATSAPP+'" target="_blank" rel="noopener">recepción</a> para restablecer el acceso.'
+        :'This access link was already activated on <b>another phone</b>. For security it cannot be shared.<br><br>If you changed phones, contact <a href="'+URL_WHATSAPP+'" target="_blank" rel="noopener">reception</a> to reset access.';
+    }
+    if(btn)btn.textContent=es?'Cerrar':'Close';
+    if(m){m.classList.add('active');m.setAttribute('aria-hidden','false');}
+  }
+  function registerPwaDeviceBinding(){
+    if(!token||isAdminToken||!deviceId)return;
+    fetch(API_URL,{
+      method:'POST',
+      headers:{'Content-Type':'text/plain'},
+      body:JSON.stringify({token:token,deviceId:deviceId,registerDevice:true})
+    }).then(function(r){return r.json();}).then(function(data){
+      if(!data)return;
+      if(data.suggestedToken)refreshGuestToken(data.suggestedToken);
+      if(data.error==='DEVICE_BOUND'){
+        revokeGuestTokenLocal();
+        showDeviceBoundModal();
+      }else if(data.error==='ACCESS_EXPIRED'||data.error==='CANCELLED'||data.accessRevoked){
+        revokeGuestTokenLocal();
+        showAccessExpiredModal();
+      }
+    }).catch(function(){});
+  }
   var doorFlow=window.MinkaDoorFlow({
     apiUrl:API_URL,
     imgBp:IMG_BP,
     getToken:function(){return token;},
+    getDeviceId:function(){return deviceId;},
     isAdmin:function(){return isAdminToken;},
     onOpenWeb:function(path){openWebInFrame(path);},
+    onDeviceBound:function(){revokeGuestTokenLocal();},
+    onAccessRevoked:function(){revokeGuestTokenLocal();},
+    onTokenRefresh:function(tok){refreshGuestToken(tok);},
     onDoorOverlayClosed:function(meta){
       closeDoorAccessModal();
       if(meta&&meta.hintFab)playDoorFabFlyAnimation(meta&&meta.fromRect);
     }
   });
   bindDoorAccessModal();
+  function stripDoorQrFromBrowserUrl(){
+    try{
+      var p=new URLSearchParams(window.location.search);
+      if(!p.has('doorQr')&&!p.has('qr'))return;
+      p.delete('doorQr');
+      p.delete('qr');
+      var q=p.toString();
+      history.replaceState({},'',location.pathname+(q?'?'+q:'')+(location.hash||''));
+    }catch(e){}
+  }
+  function reportUnauthorizedDoorScan(code){
+    if(!code)return;
+    try{
+      var sk='minka_unauth_'+String(code).slice(0,40);
+      if(sessionStorage.getItem(sk))return;
+      sessionStorage.setItem(sk,'1');
+    }catch(e){}
+    fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({reportUnauthorizedDoor:true,doorQr:code})}).catch(function(){});
+  }
+  function closeGuestOnlyModal(){
+    var m=document.getElementById('guestOnlyModal');
+    if(!m)return;
+    m.classList.remove('active');
+    m.setAttribute('aria-hidden','true');
+  }
+  function showGuestOnlyModal(){
+    var es=!window.MinkaPwaLang||window.MinkaPwaLang.isEs();
+    var m=document.getElementById('guestOnlyModal');
+    var tit=document.getElementById('guestOnlyTitle');
+    var msg=document.getElementById('guestOnlyMsg');
+    var btn=document.getElementById('guestOnlyClose');
+    if(tit)tit.textContent=es?'Acceso solo para huéspedes':'Guests only';
+    if(msg){
+      msg.innerHTML=es
+        ?'La puerta del hotel solo se abre con el acceso de tu reserva <b>activa</b>.<br><br>Abre el botón <b>Abrir puerta</b> del correo de tu estadía actual (no compartas ese enlace). Si no lo tienes, pídelo por <a href="'+URL_WHATSAPP+'" target="_blank" rel="noopener">WhatsApp</a> o en recepción.'
+        :'The hotel door opens only with your <b>active</b> booking access.<br><br>Open the <b>Open door</b> button from your current stay email (do not share that link). If you need it, ask via <a href="'+URL_WHATSAPP+'" target="_blank" rel="noopener">WhatsApp</a> or at reception.';
+    }
+    if(btn)btn.textContent=es?'Cerrar':'Close';
+    if(m){m.classList.add('active');m.setAttribute('aria-hidden','false');}
+  }
+  function bindGuestOnlyModal(){
+    var cl=document.getElementById('guestOnlyClose');
+    var bd=document.getElementById('guestOnlyBackdrop');
+    if(cl&&!cl.dataset.bound){cl.dataset.bound='1';cl.onclick=closeGuestOnlyModal;}
+    if(bd&&!bd.dataset.bound){bd.dataset.bound='1';bd.onclick=closeGuestOnlyModal;}
+  }
+  bindGuestOnlyModal();
+  function processInboundDoorQr(){
+    if(!inboundDoorQr)return;
+    var code=inboundDoorQr;
+    inboundDoorQr='';
+    stripDoorQrFromBrowserUrl();
+    if(token){
+      setTimeout(function(){doorFlow.openFromDoorQr(code);},500);
+      return;
+    }
+    reportUnauthorizedDoorScan(code);
+    showGuestOnlyModal();
+  }
   bindHubLangSwitch();
   function styleAdminDoorButtons(){
     var btnDoor=document.getElementById('btnDoor');
@@ -589,6 +777,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
     hub.classList.remove('hidden','hub-minimal');
     document.getElementById('btnDoor').style.display='flex';
     document.getElementById('btnWeb').style.display='flex';
+    var wa=document.getElementById('btnWhatsApp');
+    if(wa)wa.style.display=isAdminToken?'none':'flex';
     if(!isAdminToken){
       var bw=document.getElementById('btnWeb');
       bw.style.bottom='158px';
@@ -603,6 +793,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
     applyGuestHubLang();
     updateInstallBannerVisibility();
     if(!isAdminToken&&openedFromEmailLink){
+      registerPwaDeviceBinding();
       openedFromEmailLink=false;
       setTimeout(function(){openDoorAccessModal();},350);
     }
@@ -622,6 +813,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
       localStorage.removeItem('minka_token');
       token='';
       var bd=document.getElementById('btnDoor');if(bd)bd.style.display='none';
+      var bwa=document.getElementById('btnWhatsApp');if(bwa)bwa.style.display='none';
     }
     if(ev.data.type==='minkaNeedLogin'){
       var ov=document.getElementById('doorOverlay');
@@ -673,6 +865,16 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
       document.getElementById('installCard').classList.remove('active');
       if(isAdminToken){startAdminExperience();}
       else{showHub();}
+      processInboundDoorQr();
+    } else if(params.get('doorQr')||params.get('qr')||(inboundDoorQr&&inboundDoorQr.length)){
+      document.getElementById('installCard').classList.remove('active');
+      var hubDoor=document.getElementById('pwaHub');
+      hubDoor.classList.remove('hidden');
+      hubDoor.classList.add('hub-minimal');
+      document.getElementById('btnDoor').style.display='none';
+      document.getElementById('btnWeb').style.display='none';
+      var wa0=document.getElementById('btnWhatsApp');if(wa0)wa0.style.display='none';
+      processInboundDoorQr();
     } else {
       document.getElementById('installCard').classList.add('active');
       document.getElementById('btnOpen').href='https://www.minkahostel.com';
@@ -690,6 +892,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
   if(token){
     if(isAdmin){startAdminExperience();}
     else{showHub();}
+    processInboundDoorQr();
   } else {
     document.getElementById('pwaHub').classList.remove('hidden');
     document.getElementById('pwaHub').classList.add('hub-minimal');
@@ -698,6 +901,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
       sm.style.display='block';
       sm.innerHTML='Abre el enlace de acceso de tu correo de reserva para usar la puerta.<br><span style="font-size:11px;color:#999">Open the access link from your booking email.</span>';
     }
+    processInboundDoorQr();
   }
 
   setupInstallPrompt();
@@ -735,6 +939,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
   }
 
   btnDoor.onclick=function(){doorFlow.start();};
+  var btnWa=document.getElementById('btnWhatsApp');
+  if(btnWa)btnWa.onclick=function(){openExternal(URL_WHATSAPP);};
 
   // Prevenir back
   history.pushState({p:1},'','');
