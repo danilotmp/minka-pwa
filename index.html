@@ -39,19 +39,22 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 */
 #appFrame{position:fixed;top:0;left:50%;border:0;z-index:1;transform:translateX(-50%) scale(1.3);transform-origin:center top;-webkit-overflow-scrolling:touch;display:none}
 #appFrame.web-active{display:block}
-#pwaHub{position:fixed;inset:0;z-index:50000;background:#f4f4f5;overflow:hidden}
+#pwaHub{position:fixed;inset:0;z-index:50000;background:#1e293b;overflow:hidden}
 #pwaHub.hidden{display:none}
-#pwaHub .home-scroll{height:100%;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:max(88px,env(safe-area-inset-bottom))}
-.home-header{display:flex;align-items:center;gap:10px;padding:14px 16px 8px;background:#fff;border-bottom:1px solid #eee}
-.home-header img{width:44px;height:44px;object-fit:contain}
-.home-brand{flex:1;font-size:20px;font-weight:700;color:#1a3a5c;letter-spacing:-.02em}
-.home-hero{position:relative;margin:12px 16px 0;border-radius:14px;overflow:hidden;box-shadow:0 8px 24px rgba(0,0,0,.12);min-height:168px;background:#222}
+#pwaHub .home-scroll{height:100%;overflow-y:auto;-webkit-overflow-scrolling:touch;display:flex;flex-direction:column;min-height:100%;padding-bottom:0;background:#f4f4f5}
+.home-header{display:flex;align-items:center;gap:10px;padding:12px 16px 10px;padding-top:max(12px,env(safe-area-inset-top));background:#fff;border-bottom:1px solid #eee;flex-shrink:0}
+.home-header img{width:44px;height:44px;object-fit:contain;flex-shrink:0}
+.home-brand{flex:1;font-size:18px;font-weight:700;color:#1a3a5c;letter-spacing:-.02em;min-width:0}
+.hub-lang-switch{display:flex;gap:6px;flex-shrink:0}
+.hub-lang-switch .dl-btn,.door-lang-switch .dl-btn{min-width:36px;padding:5px 10px;border:1px solid #e2e8f0;border-radius:8px;background:#fff;font-size:11px;font-weight:600;color:#64748b;cursor:pointer;line-height:1}
+.hub-lang-switch .dl-btn.active,.door-lang-switch .dl-btn.active{background:#00A0B4;color:#fff;border-color:#00A0B4}
+.home-hero{position:relative;margin:12px 16px 0;border-radius:12px;overflow:hidden;box-shadow:0 8px 24px rgba(0,0,0,.12);min-height:168px;background:#222}
 .home-hero img{width:100%;height:168px;object-fit:cover;display:block}
 .home-hero-label{position:absolute;top:12px;left:14px;color:#fff;font-size:26px;font-weight:700;text-shadow:0 2px 8px rgba(0,0,0,.45);font-style:italic}
-.home-pill{position:absolute;bottom:12px;left:12px;border:none;border-radius:999px;padding:10px 18px;font-size:13px;font-weight:800;color:#fff;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,.25)}
+.home-pill{position:absolute;bottom:12px;left:12px;border:none;border-radius:10px;padding:10px 16px;font-size:13px;font-weight:700;letter-spacing:.02em;color:#fff;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.28)}
 .home-pill-red{background:#e53935}
 .home-pill:active{transform:scale(.98)}
-.home-backpacker{display:flex;align-items:center;margin:14px 16px;padding:0;border:none;background:transparent;cursor:pointer;width:calc(100% - 32px);text-align:left;border-radius:14px;overflow:hidden;box-shadow:0 6px 18px rgba(0,0,0,.1);min-height:72px}
+.home-backpacker{display:flex;align-items:stretch;margin:14px 16px;padding:0;border:none;background:#fff;cursor:pointer;width:calc(100% - 32px);text-align:left;border-radius:12px;overflow:hidden;box-shadow:0 6px 20px rgba(0,0,0,.12);min-height:72px}
 .home-backpacker:active{transform:scale(.99)}
 .home-backpacker-art{width:38%;min-height:72px;background:#fff;display:flex;align-items:center;justify-content:center;padding:6px}
 .home-backpacker-art img{max-width:100%;max-height:64px;object-fit:contain}
@@ -76,7 +79,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 #doorAccessModal .hub-btn-sub{display:block;font-size:11px;font-weight:400;opacity:.9;margin-top:4px;line-height:1.3}
 #doorAccessModal .hub-btn-door{background:#00A0B4;box-shadow:0 4px 12px rgba(0,160,180,.45)}
 #doorAccessModal .hub-btn:active{transform:scale(0.98)}
-.home-services{padding:4px 16px 16px}
+.home-services{padding:4px 16px 12px;flex:1 0 auto}
 .svc-card{display:flex;margin-bottom:12px;border-radius:12px;overflow:hidden;background:#fff;box-shadow:0 4px 14px rgba(0,0,0,.08);min-height:108px}
 .svc-card.svc-link{cursor:pointer}
 .svc-card.svc-link:active{transform:scale(.99)}
@@ -87,7 +90,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .svc-body h3{font-size:14px;color:#1a3a5c;margin-bottom:4px}
 .svc-body p{font-size:10px;color:#666;line-height:1.4;margin-bottom:6px}
 .svc-body ul{margin:0;padding-left:14px;font-size:10px;color:#555;line-height:1.45}
-.home-footer{padding:16px 16px 24px;text-align:center;font-size:10px;color:#777;line-height:1.5;background:#1e293b;color:#cbd5e1;margin-top:8px}
+.home-footer{padding:18px 16px max(92px,calc(20px + env(safe-area-inset-bottom)));text-align:center;font-size:10px;line-height:1.5;background:#1e293b;color:#cbd5e1;margin-top:auto;flex-shrink:0}
 .home-footer a{color:#7dd3fc;text-decoration:none}
 .home-footer .social{display:flex;justify-content:center;gap:10px;margin-bottom:10px}
 .home-footer .social span{width:32px;height:32px;border-radius:50%;background:#334155;display:inline-flex;align-items:center;justify-content:center;font-size:14px}
@@ -139,8 +142,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .door-card .d-btn:active{background:#689f38}
 .door-card .d-extra{margin-top:12px}
 .door-lang-switch{display:none;justify-content:center;gap:6px;margin:0 0 8px;padding-top:2px}
-.door-lang-switch .dl-btn{min-width:38px;padding:5px 11px;border:1px solid #e2e8f0;border-radius:8px;background:#fff;font-size:11px;font-weight:600;color:#64748b;cursor:pointer;line-height:1}
-.door-lang-switch .dl-btn.active{background:#00A0B4;color:#fff;border-color:#00A0B4}
 .d-security-foot{margin-top:12px;font-size:10px;color:#777;line-height:1.45;text-align:center}
 .balance-table{width:100%;border-collapse:collapse;margin-top:10px;font-size:12px}
 .balance-table td{padding:5px 0}
@@ -181,6 +182,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
     <header class="home-header">
       <img src="https://static.wixstatic.com/media/16b791_bc5ee8f8d8fe4e8d80c935db3aafd599~mv2.png" alt="">
       <div class="home-brand">Minka Backpackers</div>
+      <div class="hub-lang-switch" id="hubLangSwitch" role="group" aria-label="Idioma">
+        <button type="button" class="dl-btn" data-lang="es" id="hubLangEs">ES</button>
+        <button type="button" class="dl-btn" data-lang="en" id="hubLangEn">EN</button>
+      </div>
     </header>
     <section class="home-hero">
       <img id="hubHeroImg" src="https://static.wixstatic.com/media/16b791_3c82c76a95c9462abc9ea4af24a67cb5~mv2.jpg" alt="Tours">
@@ -240,7 +245,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
       <span class="hub-btn-layout">
         <span class="hub-btn-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 4h4v2H6v2H4V4zm10 0h6v6h-2V6h-4V4zM4 14h2v2h2v2H4v-4zm16 0v4h-4v-2h2v-2h2zM9 9h2v2H9V9zm4 0h2v2h-2V9zm-4 4h2v2H9v-2zm4 0h2v2h-2v-2zm4-8h2v2h-2V5zm0 4h2v2h-2V9zm-4 4h2v2h-2v-2zm4 0h2v2h-2v-2zm0 4h2v2h-2v-2z"/></svg></span>
         <span class="hub-btn-text"><span class="hub-btn-main">Abrir puerta</span><span class="hub-btn-sub">Escanear QR</span></span>
-        <span class="hub-btn-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M19 19V5H5v14h14zm0-16c1.1 0 2 .9 2 2v14c0 1.1-.9 2-2 2H5c-1.1 0-2-.9-2-2V5c0-1.1.9-2 2-2h14zM11 16h2v2h-2v-2z"/></svg></span>
       </span>
     </button>
     <p class="hub-note" id="hubNote">No olvides dar permisos de acceso a la cámara.</p>
@@ -376,6 +380,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
   // Token: leer de URL o localStorage
   var params=new URLSearchParams(window.location.search);
   var token=params.get('t')||localStorage.getItem('minka_token')||'';
+  var openedFromEmailLink=!!params.get('t');
   if(params.get('t'))localStorage.setItem('minka_token',token);
 
   var decodedToken='';try{if(token&&token.indexOf('pwa1.')!==0)decodedToken=atob(token)}catch(e){}
@@ -506,6 +511,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
     }
   });
   bindDoorAccessModal();
+  bindHubLangSwitch();
   function styleAdminDoorButtons(){
     var btnDoor=document.getElementById('btnDoor');
     btnDoor.style.display='flex';
@@ -557,6 +563,23 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
     }
     var fab=document.getElementById('btnDoor');
     if(fab)fab.setAttribute('aria-label',es?'Apertura de puerta':'Door access');
+    updateHubLangSwitchUI();
+  }
+  function updateHubLangSwitchUI(){
+    var l=window.MinkaPwaLang?window.MinkaPwaLang.get():'es';
+    var esBtn=document.getElementById('hubLangEs');
+    var enBtn=document.getElementById('hubLangEn');
+    if(esBtn)esBtn.classList.toggle('active',l==='es');
+    if(enBtn)enBtn.classList.toggle('active',l==='en');
+  }
+  function bindHubLangSwitch(){
+    var esBtn=document.getElementById('hubLangEs');
+    var enBtn=document.getElementById('hubLangEn');
+    if(!esBtn||esBtn.dataset.bound)return;
+    esBtn.dataset.bound='1';
+    esBtn.onclick=function(){if(window.MinkaPwaLang)window.MinkaPwaLang.set('es');};
+    enBtn.onclick=function(){if(window.MinkaPwaLang)window.MinkaPwaLang.set('en');};
+    updateHubLangSwitchUI();
   }
   function setText(id,t){var el=document.getElementById(id);if(el)el.textContent=t;}
   window.addEventListener('minkaLangChange',applyGuestHubLang);
@@ -565,12 +588,24 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
     var hub=document.getElementById('pwaHub');
     hub.classList.remove('hidden','hub-minimal');
     document.getElementById('btnDoor').style.display='flex';
-    document.getElementById('btnWeb').style.display=isAdminToken?'flex':'none';
+    document.getElementById('btnWeb').style.display='flex';
+    if(!isAdminToken){
+      var bw=document.getElementById('btnWeb');
+      bw.style.bottom='158px';
+      bw.style.right='27px';
+      bw.style.width='44px';
+      bw.style.height='44px';
+    }
     document.getElementById('hubBtnDoor').onclick=function(){startDoorFlowFromModal();};
+    bindHubLangSwitch();
     setupGuestHubLinks();
     applyHubImages();
     applyGuestHubLang();
     updateInstallBannerVisibility();
+    if(!isAdminToken&&openedFromEmailLink){
+      openedFromEmailLink=false;
+      setTimeout(function(){openDoorAccessModal();},350);
+    }
   }
   /** Admin: iframe directo a reservas-hospedaje (sin hub de huésped). */
   function startAdminExperience(){
@@ -699,10 +734,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
     },400);
   }
 
-  btnDoor.onclick=function(){
-    if(isAdminToken)doorFlow.start();
-    else openDoorAccessModal();
-  };
+  btnDoor.onclick=function(){doorFlow.start();};
 
   // Prevenir back
   history.pushState({p:1},'','');
