@@ -14,6 +14,24 @@ window.MinkaDoorFlow = function(cfg) {
   var LANG_CHOSEN_KEY = 'minka_lang_chosen';
   var _lastResponseContext = null;
   var _pendingDoorQr = null;
+  var _doorAutoCloseTimer = null;
+  /** Tiempo visible el mensaje «Puerta abierta» antes del cierre automático. */
+  var DOOR_SUCCESS_AUTO_CLOSE_MS = 7500;
+
+  function clearDoorAutoCloseTimer() {
+    if (_doorAutoCloseTimer) {
+      clearTimeout(_doorAutoCloseTimer);
+      _doorAutoCloseTimer = null;
+    }
+  }
+
+  function scheduleDoorAutoClose(ms) {
+    clearDoorAutoCloseTimer();
+    _doorAutoCloseTimer = setTimeout(function() {
+      _doorAutoCloseTimer = null;
+      closeOverlay();
+    }, ms);
+  }
 
   /** Llave física: texto plano o URL PWA con ?doorQr= / ?qr= (ignora el resto de la URL). */
   function extractDoorQrFromScan(raw) {
@@ -160,6 +178,7 @@ window.MinkaDoorFlow = function(cfg) {
   }
 
   function closeOverlay(opts) {
+    clearDoorAutoCloseTimer();
     if (!isAdmin() && getToken()) confirmImplicitLangChoice();
     _pendingDoorQr = null;
     var e = el();
@@ -333,7 +352,7 @@ window.MinkaDoorFlow = function(cfg) {
       var acceptBtn = document.getElementById('_doorAccept');
       if (acceptBtn) acceptBtn.onclick = function() { closeOverlay({ fabHint: true }); };
       if (!data.firstAccess && guestUi) {
-        setTimeout(function() { closeOverlay(); }, 2400);
+        scheduleDoorAutoClose(DOOR_SUCCESS_AUTO_CLOSE_MS);
       }
       return;
     }
@@ -595,6 +614,15 @@ window.MinkaDoorFlow = function(cfg) {
   var e0 = el();
   if (e0.closeBtn) {
     e0.closeBtn.onclick = function() { closeOverlay(); };
+  }
+  if (e0.overlay && !e0.overlay.dataset.backdropBound) {
+    e0.overlay.dataset.backdropBound = '1';
+    e0.overlay.addEventListener('click', function(ev) {
+      if (ev.target !== e0.overlay) return;
+      if (e0.card && e0.card.style.display === 'block') {
+        closeOverlay();
+      }
+    });
   }
 
   var langEsBtn = document.getElementById('doorLangEs');
