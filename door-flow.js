@@ -11,6 +11,16 @@ window.MinkaDoorFlow = function(cfg) {
   var qrScanner = null;
   var scanLock = false;
   var LANG_KEY = 'minka_lang';
+  var LANG_CHOSEN_KEY = 'minka_lang_chosen';
+  try {
+    if (localStorage.getItem(LANG_CHOSEN_KEY) !== '1') {
+      var prevLang = sessionStorage.getItem(LANG_KEY);
+      if (prevLang === 'es' || prevLang === 'en') {
+        localStorage.setItem(LANG_KEY, prevLang);
+        localStorage.setItem(LANG_CHOSEN_KEY, '1');
+      }
+    }
+  } catch (migrateErr) {}
   var _lastResponseContext = null;
   var _pendingDoorQr = null;
 
@@ -42,9 +52,14 @@ window.MinkaDoorFlow = function(cfg) {
 
   window.MinkaDoorQr = { extract: extractDoorQrFromScan };
 
+  function hasUserChosenLang() {
+    try { return localStorage.getItem(LANG_CHOSEN_KEY) === '1'; } catch (e) {}
+    return false;
+  }
+
   function getLang() {
     try {
-      var l = sessionStorage.getItem(LANG_KEY);
+      var l = localStorage.getItem(LANG_KEY) || sessionStorage.getItem(LANG_KEY);
       if (l === 'en' || l === 'es') return l;
     } catch (e) {}
     return 'es';
@@ -52,7 +67,11 @@ window.MinkaDoorFlow = function(cfg) {
 
   function setLang(lang) {
     if (lang !== 'es' && lang !== 'en') return;
-    try { sessionStorage.setItem(LANG_KEY, lang); } catch (e) {}
+    try {
+      localStorage.setItem(LANG_KEY, lang);
+      sessionStorage.setItem(LANG_KEY, lang);
+      localStorage.setItem(LANG_CHOSEN_KEY, '1');
+    } catch (e) {}
     updateLangSwitchUI();
     try { window.dispatchEvent(new CustomEvent('minkaLangChange')); } catch (e) {}
     updateQrHintUI();
@@ -72,6 +91,10 @@ window.MinkaDoorFlow = function(cfg) {
     var enBtn = document.getElementById('doorLangEn');
     if (esBtn) esBtn.classList.toggle('active', getLang() === 'es');
     if (enBtn) enBtn.classList.toggle('active', getLang() === 'en');
+  }
+
+  function shouldShowDoorLangSwitch(guestUi) {
+    return !!guestUi && !isAdmin() && !hasUserChosenLang();
   }
 
   function bindLangSwitch(show) {
@@ -150,7 +173,7 @@ window.MinkaDoorFlow = function(cfg) {
     stopScanner();
     e.loading.style.display = 'none';
     e.card.style.display = 'block';
-    bindLangSwitch(!!guestUi && !isAdmin());
+    bindLangSwitch(shouldShowDoorLangSwitch(guestUi));
     e.iconEl.className = 'd-icon ' + type;
     e.iconEl.style.display = 'flex';
     e.iconEl.textContent = type === 'success' ? '✔' : type === 'error' ? '✗' : type === 'warning' ? '!' : '◎';
@@ -167,11 +190,16 @@ window.MinkaDoorFlow = function(cfg) {
       : '<b>For your security:</b> do not allow strangers in and always keep the door closed.';
   }
 
-  function smileLine(es, name) {
+  function smileLineHtml(es, name) {
     var n = name || '';
-    return es
-      ? 'No olvides sonreír a la cámara' + (n ? ', <b>' + n + '</b>' : '') + '.'
-      : 'Don\'t forget to smile at the camera' + (n ? ', <b>' + n + '</b>' : '') + '.';
+    var text = es
+      ? 'No olvides sonreír a la cámara' + (n ? ', ' + n : '') + '.'
+      : 'Don\'t forget to smile at the camera' + (n ? ', ' + n : '') + '.';
+    return '<p class="d-msg-smile">' + text + '</p>';
+  }
+
+  function securityLineHtml(es) {
+    return '<p class="d-msg-security">' + securityLine(es) + '</p>';
   }
 
   function monitoringLine(es) {
@@ -187,12 +215,12 @@ window.MinkaDoorFlow = function(cfg) {
     if (!e.qrHintMain) return;
     var es = isEs();
     e.qrHintMain.textContent = es
-      ? 'Escanea el código del hotel que está debajo del timbre, en la puerta de entrada.'
-      : 'Scan the hotel code below the doorbell at the entrance door.';
+      ? 'Escanea el código QR del Hotel'
+      : 'Scan the hotel QR code';
     if (e.qrHintSub) {
       e.qrHintSub.textContent = es
-        ? 'Puede ser un enlace a esta app; usamos solo el código de la puerta, no tu enlace personal.'
-        : 'It may be a link to this app; we only use the door code, not your personal link.';
+        ? 'Para abrir la puerta escanea el código QR que se encuentra en el timbre de la entrada del hotel.'
+        : 'To open the door, scan the QR code on the doorbell at the hotel entrance.';
     }
   }
 
@@ -285,7 +313,7 @@ window.MinkaDoorFlow = function(cfg) {
         actions += '<div class="d-security-foot">' + securityLine(es) + '</div>';
       } else {
         tit = es ? 'Puerta abierta' : 'Door opened';
-        msg = smileLine(es, data.name) + '<br>' + securityLine(es);
+        msg = smileLineHtml(es, data.name) + securityLineHtml(es);
       }
       showCard('success', tit, msg, roomHtml, actions, guestUi);
       var acceptBtn = document.getElementById('_doorAccept');
