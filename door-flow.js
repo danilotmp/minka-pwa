@@ -311,10 +311,14 @@ window.MinkaDoorFlow = function(cfg) {
     }
   }
 
-  function expiredAccessHtml(es) {
+  function deniedAccessTitle(es) {
+    return es ? 'Acceso Denegado' : 'Access denied';
+  }
+
+  function deniedAccessHtml(es) {
     return es
-      ? 'No hay una estadía activa para este acceso en la fecha de hoy. Si necesitas ayuda, contacta recepción o WhatsApp.'
-      : 'There is no active stay for this access on today\'s date. Contact reception or WhatsApp if you need help.';
+      ? 'Acceso exclusivo para huéspedes del hotel.<br><br>Si necesitas ayuda, contacta recepción o WhatsApp.'
+      : 'Exclusive access for hotel guests.<br><br>If you need help, contact reception or WhatsApp.';
   }
 
   function applyResponse(data, confirmBalanceRetry) {
@@ -360,8 +364,7 @@ window.MinkaDoorFlow = function(cfg) {
     var err = data.error;
     if (err === 'ACCESS_EXPIRED') {
       maybeRevokeGuestAccess(data);
-      showCard('warning', es ? 'Acceso caducado' : 'Access expired',
-        data.message && data.message.indexOf('|') < 0 ? data.message : expiredAccessHtml(es),
+      showCard('warning', deniedAccessTitle(es), deniedAccessHtml(es),
         '', '<button type="button" class="d-btn" id="_doorExpOk">' + (es ? 'Entendido' : 'OK') + '</button>', guestUi);
       var expOk = document.getElementById('_doorExpOk');
       if (expOk) expOk.onclick = function() { closeOverlay(); };
@@ -369,7 +372,7 @@ window.MinkaDoorFlow = function(cfg) {
     }
     if (err === 'NO_ACTIVE_RESERVATION') {
       maybeRevokeGuestAccess({ accessRevoked: true });
-      showCard('warning', es ? 'Acceso caducado' : 'Access expired', expiredAccessHtml(es),
+      showCard('warning', deniedAccessTitle(es), deniedAccessHtml(es),
         '', '<button type="button" class="d-btn" id="_doorNaOk">' + (es ? 'Entendido' : 'OK') + '</button>', guestUi);
       var naOk = document.getElementById('_doorNaOk');
       if (naOk) naOk.onclick = function() { closeOverlay(); };
@@ -416,8 +419,7 @@ window.MinkaDoorFlow = function(cfg) {
     if (err === 'DC_NOT_STARTED') { showCard('info', es ? 'Horario no disponible' : 'Schedule not available', data.message, '', '', guestUi); return; }
     if (err === 'DC_ENDED' || err === 'ENDED') {
       maybeRevokeGuestAccess(data.accessRevoked ? data : { accessRevoked: true });
-      showCard('warning', es ? 'Acceso caducado' : 'Access expired',
-        err === 'ENDED' ? expiredAccessHtml(es) : (data.message || expiredAccessHtml(es)),
+      showCard('warning', deniedAccessTitle(es), deniedAccessHtml(es),
         '', '<button type="button" class="d-btn" id="_doorEndOk">' + (es ? 'Entendido' : 'OK') + '</button>', guestUi);
       var endOk = document.getElementById('_doorEndOk');
       if (endOk) endOk.onclick = function() { closeOverlay(); };
@@ -425,10 +427,10 @@ window.MinkaDoorFlow = function(cfg) {
     }
     if (err === 'CANCELLED') {
       maybeRevokeGuestAccess({ accessRevoked: true });
-      showCard('warning', es ? 'Acceso caducado' : 'Access expired', data.message || expiredAccessHtml(es), '', '', guestUi);
+      showCard('warning', deniedAccessTitle(es), deniedAccessHtml(es), '', '', guestUi);
       return;
     }
-    if (err === 'DISABLED') { showCard('error', es ? 'Acceso no autorizado' : 'Access denied', data.message, '', '', guestUi); return; }
+    if (err === 'DISABLED') { showCard('error', deniedAccessTitle(es), deniedAccessHtml(es), '', '', guestUi); return; }
     if (err === 'DOOR_FAIL') {
       var who = data.name || '';
       showCard('error', es ? 'No se pudo abrir' : 'Could not open',
@@ -466,7 +468,7 @@ window.MinkaDoorFlow = function(cfg) {
     }
     if (err === 'NOT_FOUND' || err === 'NO_UUID') {
       maybeRevokeGuestAccess({ accessRevoked: true });
-      showCard('warning', es ? 'Acceso caducado' : 'Access expired', expiredAccessHtml(es), '', '', guestUi);
+      showCard('warning', deniedAccessTitle(es), deniedAccessHtml(es), '', '', guestUi);
       return;
     }
     if (err === 'DEVICE_BOUND') {
