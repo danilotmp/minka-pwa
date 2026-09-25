@@ -12,15 +12,6 @@ window.MinkaDoorFlow = function(cfg) {
   var scanLock = false;
   var LANG_KEY = 'minka_lang';
   var LANG_CHOSEN_KEY = 'minka_lang_chosen';
-  try {
-    if (localStorage.getItem(LANG_CHOSEN_KEY) !== '1') {
-      var prevLang = sessionStorage.getItem(LANG_KEY);
-      if (prevLang === 'es' || prevLang === 'en') {
-        localStorage.setItem(LANG_KEY, prevLang);
-        localStorage.setItem(LANG_CHOSEN_KEY, '1');
-      }
-    }
-  } catch (migrateErr) {}
   var _lastResponseContext = null;
   var _pendingDoorQr = null;
 
@@ -63,6 +54,16 @@ window.MinkaDoorFlow = function(cfg) {
       if (l === 'en' || l === 'es') return l;
     } catch (e) {}
     return 'es';
+  }
+
+  function confirmImplicitLangChoice() {
+    if (hasUserChosenLang() || isAdmin()) return;
+    try {
+      localStorage.setItem(LANG_KEY, getLang());
+      sessionStorage.setItem(LANG_KEY, getLang());
+      localStorage.setItem(LANG_CHOSEN_KEY, '1');
+    } catch (e) {}
+    bindLangSwitch(false);
   }
 
   function setLang(lang) {
@@ -146,7 +147,20 @@ window.MinkaDoorFlow = function(cfg) {
     if (e.qrStage) e.qrStage.style.display = 'none';
   }
 
+  function openPaymentsPage(payUrl) {
+    if (!payUrl) return;
+    confirmImplicitLangChoice();
+    var path = payUrl;
+    if (path.indexOf('https://www.minkahostel.com') === 0) {
+      path = path.substring('https://www.minkahostel.com'.length);
+    }
+    if (cfg.onOpenWeb) cfg.onOpenWeb(path);
+    else window.open(payUrl, '_blank');
+    closeOverlay();
+  }
+
   function closeOverlay(opts) {
+    if (!isAdmin() && getToken()) confirmImplicitLangChoice();
     _pendingDoorQr = null;
     var e = el();
     var cardVisible = e.card && e.card.style.display === 'block';
@@ -371,10 +385,13 @@ window.MinkaDoorFlow = function(cfg) {
       return;
     }
     if (err === 'BALANCE_CHECKOUT' || err === 'ENDED_BALANCE' || err === 'DC_ENDED_BALANCE' || err === 'DC_LAST_HOUR') {
-      var pHtml = '<img src="' + IMG_BP + '" style="width:60px;margin:4px auto 8px;display:block">';
-      pHtml += '<div style="font-size:11px;color:#555;line-height:1.6">' + data.message + '</div>';
-      showCard('warning', es ? 'Saldo pendiente' : 'Pending balance', '', pHtml,
-        data.balance > 0 ? '<a class="d-btn" href="https://www.minkahostel.com/?t=' + encodeURIComponent(getToken()) + '" target="_blank">' + (es ? 'Pagar' : 'Pay') + '</a>' : '', guestUi);
+      var pHtml = '<div style="font-size:11px;color:#555;line-height:1.6">' + data.message + '</div>';
+      var payActions = data.balance > 0 && data.payUrl
+        ? '<button type="button" class="d-btn" id="_doorPayBtn">' + (es ? 'Pagar' : 'Pay') + '</button>'
+        : '';
+      showCard('warning', es ? 'Saldo pendiente' : 'Pending balance', '', pHtml, payActions, guestUi);
+      var payBtn = document.getElementById('_doorPayBtn');
+      if (payBtn) payBtn.onclick = function() { openPaymentsPage(data.payUrl); };
       return;
     }
     if (err === 'DC_NOT_STARTED') { showCard('info', es ? 'Horario no disponible' : 'Schedule not available', data.message, '', '', guestUi); return; }
